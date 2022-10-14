@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "api"
+version = "0.1.0"
+description = "Backend api to stocks sentiment analyzer platform"
+authors = ["Harshaa Vardaan"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.79.0"
+uvicorn = "^0.18.2"
+python-dotenv = "^0.20.0"
+tweepy = {extras = ["async"], version = "^4.10.0"}
+praw = "^7.6.0"
+transformers = "^4.21.2"
+emoji = "^2.1.0"
+celery = "^5.2.7"
+vadersentiment = "^3.3.2"
+influxdb-client = "^1.33.0"
+nltk = "^3.7"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
