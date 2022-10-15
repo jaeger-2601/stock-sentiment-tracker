@@ -6,8 +6,11 @@ from nltk.corpus import stopwords
 
 from data_ingestion.stocks import djia_stocks
 
-nltk.download('stopwords')
-STOPWORDS = stopwords.words('english')
+try:
+    STOPWORDS = stopwords.words('english')
+except LookupError:
+    nltk.download('stopwords')
+    STOPWORDS = stopwords.words('english')
 
 def preprocess_twitter_text(text:str) -> str:
 

@@ -44,15 +44,11 @@ def apply_analysis(text:str):
 
 load_dotenv()
 
-ORG='Stock Sentiment Analyzer'
-SENTIMENT_BUCKET='stock_sentiments'
-TEXT_BUCKET='social_media_text'
-
 app = Celery('sentiment_analysis', broker='pyamqp://guest@localhost//')
 db_client = InfluxDBClient(
     url='http://localhost:8086',
     token=os.environ['INFLUX_API_TOKEN'],
-    org=ORG
+    org=os.environ['ORG']
 )
 analyzer = SentimentIntensityAnalyzer()
 
@@ -65,7 +61,7 @@ def recognize_company(text) -> str | None:
 
 
 @app.task
-def analyze_and_store(text:str):
+def analyze_and_store(text:str) -> None:
 
     result = analyzer.polarity_scores(text)
     company = recognize_company(text)
@@ -82,12 +78,20 @@ def analyze_and_store(text:str):
                 .field('positive', result['pos']) \
                 .field('neutral', result['neu'])
             
-            write_api.write(SENTIMENT_BUCKET, ORG, point)
+            write_api.write(
+                bucket=os.environ['SENTIMENT_BUCKET']
+                org=os.os.environ['ORG'], 
+                record=point
+            )
 
             point = Point('text') \
                 .tag('company', company) \
                 .field('text', remove_uneccesary_words(text, company))
 
-            write_api.write(TEXT_BUCKET, ORG, point)
+            write_api.write(
+                bucket=os.environ['TEXT_BUCKET'], 
+                org=os.environ['ORG'], 
+                record=point
+            )
 
 

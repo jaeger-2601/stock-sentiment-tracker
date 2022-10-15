@@ -18,7 +18,13 @@ vadersentiment = "^3.3.2"
 influxdb-client = "^1.33.0"
 nltk = "^3.7"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
+poethepoet = "^0.16.4"
+
+
+[tool.poe.tasks]
+download-pytorch-cuda11 = "pip install torch==1.12.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116"
+download-pytorch-cpu = "pip install torch==1.12.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
