@@ -17,9 +17,11 @@ celery = "^5.2.7"
 vadersentiment = "^3.3.2"
 influxdb-client = "^1.33.0"
 nltk = "^3.7"
+scipy = "^1.9.2"
 
 [tool.poetry.group.dev.dependencies]
 poethepoet = "^0.16.4"
+ipython = "^8.5.0"
 
 
 [tool.poe.tasks]

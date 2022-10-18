@@ -5,8 +5,7 @@ from dotenv import load_dotenv
 from tweepy import StreamingClient, StreamRule, Tweet
 
 from data_ingestion.stocks import djia_stocks
-from data_ingestion.preprocessing import preprocess_twitter_text
-from data_ingestion.sentiment_analysis import sentiment_analysis
+from data_ingestion.sentiment_analysis.sentiment_analysis import analyze_and_store
 
 load_dotenv()
 
@@ -63,8 +62,8 @@ class TweetAggregator(StreamingClient):
     def on_tweet(self, tweet: Tweet):
 
         self.tweet_count += 1
-        sentiment_analysis.analyze_and_store(
-            text=preprocess_twitter_text(tweet.text)
+        analyze_and_store.delay(
+            text=tweet.text
         )
 
         if datetime.now() > self.end_time:

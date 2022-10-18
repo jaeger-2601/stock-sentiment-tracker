@@ -6,8 +6,7 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 
 from data_ingestion.stocks import stocks_subreddits
-from data_ingestion.preprocessing import preprocess_reddit_text
-from data_ingestion.sentiment_analysis import sentiment_analysis
+from data_ingestion.sentiment_analysis.sentiment_analysis import analyze_and_store
 
 load_dotenv() 
 
@@ -36,8 +35,8 @@ class RedditAggregator:
         for comment in subreddit_instance.stream.comments():
 
             comment_count += 1
-            sentiment_analysis.analyze_and_store(
-                text=preprocess_reddit_text(comment.body)
+            analyze_and_store.delay(
+                text=comment.body
             )
 
             if datetime.now() > end_time:

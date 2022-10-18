@@ -1,97 +1,121 @@
 import os
+import re
+import torch
+import numpy as np
 from celery import Celery
 from dotenv import load_dotenv
-from influxdb_client.client.write_api import SYNCHRONOUS
+from collections import Counter
+from scipy.special import softmax
 from influxdb_client import InfluxDBClient, Point
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-
-from data_ingestion.stocks import djia_stocks
-from data_ingestion.preprocessing import remove_uneccesary_words
-
-'''
-TODO : Use roberta model instead of vader sentiment
-
-from transformers import AutoModelForSequenceClassification
-from transformers import TFAutoModelForSequenceClassification
+from influxdb_client.client.write_api import SYNCHRONOUS
 from transformers import AutoTokenizer, AutoConfig
+from transformers import AutoModelForSequenceClassification
+
+from data_ingestion.stocks import djia_stocks, djia_stocks_reverse
+from data_ingestion.preprocessing import preprocess_text, sentiment_analysis_preprocess, text_analysis_preprocess
 
 MODEL = 'cardiffnlp/twitter-roberta-base-sentiment-latest'
 
+# TODO: install cuda
+DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu' 
+
+print(f'Using device : {DEVICE}')
+
+load_dotenv()
+
 tokenizer = AutoTokenizer.from_pretrained(MODEL)
 config = AutoConfig.from_pretrained(MODEL)
-# PT
-model = AutoModelForSequenceClassification.from_pretrained(MODEL)
+model = AutoModelForSequenceClassification.from_pretrained(MODEL).to(DEVICE)
 
-@app.task
-def apply_analysis(text:str):
+app = Celery('data_ingestion.sentiment_analysis.sentiment_analysis', broker='pyamqp://guest@localhost//')
+db_client = InfluxDBClient(
+    url=os.environ['INFLUX_URL'],
+    token=os.environ['INFLUX_API_TOKEN'],
+    org=os.environ['ORG']
+)
 
-    encoded_input = tokenizer(text, return_tensors='pt')
+name_regex = re.compile(f'({"|".join([name.lower() for name in djia_stocks.keys()])})')
+ticker_regex = re.compile(f'({"|".join(["$"+ticker.lower() for ticker in djia_stocks.values()])})')
+
+def recognize_company(text) -> str | None:
+
+    text = text.lower()
+
+    companies = name_regex.findall(text)
+    tickers = ticker_regex.findall(text)
+
+    companies += [ djia_stocks_reverse[ticker.upper()] for ticker in tickers ]
+
+    if len(companies) == 0:
+        return None
+
+    company, count = Counter(companies).most_common(1)[0]
+
+    return djia_stocks[company]
+
+
+
+def apply_analysis(text:str) -> dict | None:
+
+    result = {}
+    company = recognize_company(text)
+    text = preprocess_text(text)
+
+    if company is None:
+        return None
+
+    encoded_input = tokenizer(
+        text=sentiment_analysis_preprocess(text), 
+        return_tensors='pt'
+    ).to(DEVICE)
+
     output = model(**encoded_input)
     scores = output[0][0].detach().numpy()
     scores = softmax(scores)
 
-    ranking = np.argsort(scores)
-    ranking = ranking[::-1]
+    ranking = np.argsort(scores)[::-1]
+
     for i in range(scores.shape[0]):
         l = config.id2label[ranking[i]]
         s = scores[ranking[i]]
 
-        with open('p.txt', 'w') as fp:
-            fp.write(f"{i+1}) {l} {np.round(float(s), 4)}\n")
-
         print(f"{i+1}) {l} {np.round(float(s), 4)}")
-'''
-
-load_dotenv()
-
-app = Celery('sentiment_analysis', broker='pyamqp://guest@localhost//')
-db_client = InfluxDBClient(
-    url='http://localhost:8086',
-    token=os.environ['INFLUX_API_TOKEN'],
-    org=os.environ['ORG']
-)
-analyzer = SentimentIntensityAnalyzer()
-
-def recognize_company(text) -> str | None:
-
-    for ticker, name in djia_stocks.items():
         
-        if f'cashtag_{ticker[1:]}' in text or name in text:
-            return name
+        result[l.lower()] = s
 
+    result['compound'] = result['positive'] - result['negative']
+    result['company'] = company.capitalize()
+
+    return result
 
 @app.task
 def analyze_and_store(text:str) -> None:
 
-    result = analyzer.polarity_scores(text)
-    company = recognize_company(text)
+    result = apply_analysis(text)
 
-
-    if not company is None:
+    if not result is None:
 
         with db_client.write_api(write_options=SYNCHRONOUS) as write_api:
 
             point = Point('stocks') \
-                .tag('company', company) \
+                .tag('company', result['company']) \
                 .field('compound', result['compound']) \
-                .field('negative', result['neg']) \
-                .field('positive', result['pos']) \
-                .field('neutral', result['neu'])
+                .field('negative', result['negative']) \
+                .field('positive', result['positive']) \
+                .field('neutral', result['neutral'])
             
             write_api.write(
-                bucket=os.environ['SENTIMENT_BUCKET']
-                org=os.os.environ['ORG'], 
+                bucket=os.environ['SENTIMENT_BUCKET'],
+                org=os.environ['ORG'], 
                 record=point
             )
 
             point = Point('text') \
-                .tag('company', company) \
-                .field('text', remove_uneccesary_words(text, company))
+                .tag('company', result['company']) \
+                .field('text', text_analysis_preprocess(text, result['company']))
 
             write_api.write(
                 bucket=os.environ['TEXT_BUCKET'], 
                 org=os.environ['ORG'], 
                 record=point
             )
-
-

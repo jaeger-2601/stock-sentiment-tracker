@@ -12,50 +12,43 @@ except LookupError:
     nltk.download('stopwords')
     STOPWORDS = stopwords.words('english')
 
-def preprocess_twitter_text(text:str) -> str:
+def preprocess_text(text:str):
 
     # remove URLs
-    text = re.sub(r'https?://\S+', "", text)
-    text = re.sub(r'www.\S+', "", text)
+    text = re.sub(r'https?://\S+', '', text)
+    text = re.sub(r'www.\S+', '', text)
     # remove '
-    text = text.replace('&#39;', "'")
+    text = text.replace('&#39;', '\'')
+    # demojize
+    text = emoji.demojize(text, delimiters=('', ' '))
+    return text.strip()
+
+def sentiment_analysis_preprocess(text:str) -> str:
+
     # remove symbol names
-    text = re.sub(r'(\#)(\S+)', r'hashtag_\2', text)
-    text = re.sub(r'(\$)([A-Za-z]+)', r'cashtag_\2', text)
+    text = re.sub(r'(\#)(\S+)', r'\2', text)
+    text = re.sub(r'(\$)([A-Za-z]+)', r'\2', text)
     # remove usernames
-    text = re.sub(r'(\@)(\S+)', r'mention_\2', text)
-    # demojize
-    text = emoji.demojize(text, delimiters=("", " "))
+    text = re.sub(r'(u\\)(\S+)', r'\2', text)
+    text = re.sub(r'(\@)(\S+)', r'\2', text)
 
-    return text.strip()
+    return text
 
-def preprocess_reddit_text(text:str) -> str:
+def text_analysis_preprocess(text, company):
 
-    # remove URLs
-    text = re.sub(r'https?://\S+', "", text)
-    text = re.sub(r'www.\S+', "", text)
-    # remove '
-    text = text.replace('&#39;', "'")
-    # demojize
-    text = emoji.demojize(text, delimiters=("", " "))
+    # convert to lower
+    text = text.lower()
+    # remove cashtag and name
+    text = re.sub(f'${company}', '', text)
+    text = re.sub(djia_stocks[company], '', text)
     # remove usernames
-    text = re.sub(r'(u\\)(\S+)', r'mention_\2', text)
-    # remove punctuation
-    text  = "".join([char for char in text if char not in string.punctuation])
-
-    return text.strip()
-
-def remove_uneccesary_words(text, company):
-
-    # remove cashtags
-    text = re.sub(r'(cashtag_)(\S+)', '', text)
-    # remove mentions
-    text = re.sub(r'(mention_)(\S+)', '', text)
+    text = re.sub(r'(u\\)(\S+)', '', text)
+    text = re.sub(r'(\@)(\S+)', '', text)
     # remove hashtags
-    text = re.sub(r'(hashtag_)(\S+)', '', text)
-    # remove company names
-    text = re.sub(f'( {"|".join(djia_stocks.values())} )', '', text)
+    text = re.sub(r'(hashtag_)(\S+)', r'\2', text)
+    # remove punctuation
+    text  = ''.join([char for char in text if char not in string.punctuation])
     # remove stop words
-    text = re.sub(f'( {"|".join(STOPWORDS)} )', '', text)
+    text = ' '.join([word for word in text.split() if word not in STOPWORDS])
 
     return text
