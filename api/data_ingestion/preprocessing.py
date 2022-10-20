@@ -4,7 +4,7 @@ import string
 import nltk
 from nltk.corpus import stopwords
 
-from data_ingestion.stocks import djia_stocks
+from data_ingestion.stocks import djia_stocks_reverse
 
 try:
     STOPWORDS = stopwords.words('english')
@@ -40,7 +40,7 @@ def text_analysis_preprocess(text, company):
     text = text.lower()
     # remove cashtag and name
     text = re.sub(f'${company}', '', text)
-    text = re.sub(djia_stocks[company], '', text)
+    text = re.sub(djia_stocks_reverse[company], '', text)
     # remove usernames
     text = re.sub(r'(u\\)(\S+)', '', text)
     text = re.sub(r'(\@)(\S+)', '', text)

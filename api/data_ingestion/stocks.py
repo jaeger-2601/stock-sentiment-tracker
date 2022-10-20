@@ -15,7 +15,7 @@ djia_stocks = {
     'ibm':'IBM',
     'intel':'INTC',
     'jpmorgan chase':'JPM',
-    'mcDonald':'MCD',
+    'mcdonald':'MCD',
     'merck':'MRK',
     'microsoft':'MSFT',
     'nike':'NKE',

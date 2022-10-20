@@ -1,11 +1,11 @@
 import os
 from time import sleep
+from celery import Celery
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from tweepy import StreamingClient, StreamRule, Tweet
 
 from data_ingestion.stocks import djia_stocks
-from data_ingestion.sentiment_analysis.sentiment_analysis import analyze_and_store
 
 load_dotenv()
 
@@ -20,6 +20,10 @@ class TweetAggregator(StreamingClient):
         self.rules = self.build_default_rules()
         self.timeout = timedelta(minutes=5)
         self.tweet_count = 0
+        self.celery = Celery(
+            'data_ingestion.sentiment_analysis.sentiment_analysis', 
+            broker='pyamqp://guest@localhost//'
+        )
 
         super().__init__(*args, **kwargs)
 
@@ -61,10 +65,13 @@ class TweetAggregator(StreamingClient):
     
     def on_tweet(self, tweet: Tweet):
 
-        self.tweet_count += 1
-        analyze_and_store.delay(
-            text=tweet.text
+
+        self.celery.send_task(
+            'analyze_and_store',
+            args=(tweet.text,),
         )
+        self.tweet_count += 1
+        
 
         if datetime.now() > self.end_time:
             self.disconnect()
@@ -81,7 +88,7 @@ class TweetAggregator(StreamingClient):
             self.filter()
 
             print(f'Processed {self.tweet_count} tweets in 5 minutes')
-            sleep(60*10)
+            sleep(60)
 
 
 if __name__ == '__main__':

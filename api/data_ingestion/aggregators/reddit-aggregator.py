@@ -1,12 +1,12 @@
 import os
 import praw
 from time import sleep
+from celery import Celery
 from typing import Generator
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 
 from data_ingestion.stocks import stocks_subreddits
-from data_ingestion.sentiment_analysis.sentiment_analysis import analyze_and_store
 
 load_dotenv() 
 
@@ -19,6 +19,10 @@ class RedditAggregator:
             client_secret=client_secret,
             user_agent='Reddit Aggregator'
             )
+        self.celery = Celery(
+            'data_ingestion.sentiment_analysis.sentiment_analysis', 
+            broker='pyamqp://guest@localhost//'
+        )
 
     
     def build_subreddit_instance(self):
@@ -35,8 +39,9 @@ class RedditAggregator:
         for comment in subreddit_instance.stream.comments():
 
             comment_count += 1
-            analyze_and_store.delay(
-                text=comment.body
+            self.celery.send_task(
+                name='analyze_and_store',
+                args=(comment.body,)
             )
 
             if datetime.now() > end_time:
@@ -51,8 +56,8 @@ class RedditAggregator:
         for comment_count in self.aggregate_data(timedelta(minutes=5)):
 
             print(f'Processed {comment_count} reddit comments in 5 minutes')
-            #sleep for 10 minutes
-            sleep(60*10)
+            #sleep for 1 minute
+            sleep(60)
 
             
 
