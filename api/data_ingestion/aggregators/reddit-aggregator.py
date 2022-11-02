@@ -38,21 +38,25 @@ class RedditAggregator:
         subreddit_instance = self.reddit.subreddit('+'.join(stocks_subreddits))
         comment_count = 0
 
-        for comment in subreddit_instance.stream.comments():
 
-            comment_count += 1
-            self.celery.send_task(
-                name='analyze_and_store',
-                args=(comment.body,)
-            )
+        try:
 
-            if datetime.now() > end_time:
+            for comment in subreddit_instance.stream.comments():
 
-                self.logger.info(f'Processed {comment_count} comments in 5 minutes')
-                end_time = datetime.now() + timedelta(minutes=5)
-                comment_count = 0
-       
+                comment_count += 1
+                self.celery.send_task(
+                    name='analyze_and_store',
+                    args=(comment.body,)
+                )
 
+                if datetime.now() > end_time:
+
+                    self.logger.info(f'Processed {comment_count} comments in 5 minutes')
+                    end_time = datetime.now() + timedelta(minutes=5)
+                    comment_count = 0
+
+        except KeyboardInterrupt:
+            self.logger.critical('Keyboard Interrupt received. Shutting down..')
 
 if __name__ == '__main__':
     reddit_aggregator = RedditAggregator(os.environ['CLIENT_ID'], os.environ['CLIENT_SECRET'])

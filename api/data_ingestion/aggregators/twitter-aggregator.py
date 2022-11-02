@@ -127,13 +127,20 @@ class TweetAggregator(StreamingClient):
 
         self.end_time = datetime.now() + self.timeout
 
-        while True:
-            self.logger.info('Starting filter()')
-            self.filter()
-            self.logger.info(f'Stream disconnected. Backing off for {2 ** backoff} seconds')
+        try:
 
-            sleep(2 ** backoff)
-            backoff += 1
+            while True:
+
+                self.logger.info('Starting filter()')
+                self.filter()
+                self.logger.info(f'Stream disconnected. Backing off for {2 ** backoff} seconds')
+
+                sleep(2 ** backoff)
+                backoff += 1
+
+        except KeyboardInterrupt:
+            self.logger.critical('Keyboard Interrupt received. Shutting down..')
+
 
 
 if __name__ == '__main__':
