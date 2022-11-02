@@ -103,6 +103,7 @@ def apply_analysis(text:str) -> dict | None:
 @app.task(name='analyze_and_store')
 def analyze_and_store(text:str) -> None:
 
+    text = preprocess_text(text)
     result = apply_analysis(text)
 
     if not result is None:

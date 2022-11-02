@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from influxdb_client import InfluxDBClient
 
-from .query_builder import build_moving_avg_query
+from .query_builder import build_moving_avg_query, build_social_media_text_query
 
 load_dotenv()
 
@@ -22,10 +22,28 @@ def get_moving_averages(company:str, time_range:str) -> list:
 
     moving_averages = []
 
-    print(result)
-
     for table in result:
         for record in table.records:
             moving_averages.append(record.get_value())
 
     return moving_averages
+
+def get_social_media_text(company:str, time_range:str) -> list:
+
+    result = query_api.query(
+        org=os.environ['ORG'],
+        query=build_social_media_text_query(company, time_range)
+    )
+
+    social_media_text = []
+
+    for table in result:
+        for record in table.records:
+            
+            val = record.get_value()
+            if type(val) == str:
+                social_media_text.append(record.get_value())
+    
+    return social_media_text
+
+

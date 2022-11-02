@@ -35,15 +35,18 @@ class TweetAggregator(StreamingClient):
 
     def build_default_rules(self):
 
+        ticker_rule = ' OR '.join([f'${stock}' for stock in self.stocks.values()])
+        name_rule =  ' OR '.join(self.stocks.keys()) 
+
         return [
             # Cashtag rule to get tweets with stock tickers
             StreamRule(
-            ' OR '.join([f'${stock}' for stock in self.stocks.values()]) + ' lang:en'
+                f'({ticker_rule}) lang:en'
             ),
             # Name rule to get tweets with company names
             StreamRule(
-                ' OR '.join(self.stocks.keys()) + ' lang:en'
-            ),
+                f'({name_rule}) lang:en'
+            )
         ]
     
     def add_default_rules(self):
