@@ -1,0 +1,12 @@
+.navbar-offcanvas {
+    background-color: #20232a;
+    color: white;
+}
+
+.navbar-offcanvas .btn-close {
+    background-color: white !important ;
+}
+
+.ticker-ranks  th {
+    color: white;
+}
