@@ -2,7 +2,8 @@ import Navbar from 'react-bootstrap/Navbar';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import Table from 'react-bootstrap/Table';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 
 import { TICKERS_INFO_ROUTE } from './Routes';
 
@@ -37,7 +38,7 @@ function TickerTable(props) {
                 <tr key={data['rank']}>
                     <td>{data['rank']}</td>
                     <td>
-                        <a href={`/company/${data['company']}`} className="ticker-name">{data['company']}</a>
+                        <Link to={`/company/${data['company']}`} className="ticker-name" onClick={props.closeOffCanvas}>{data['company']}</Link>
                     </td>
                     <td className={`sentiment-${sentimentCssTable[data['sentiment']]}`}>{data['score'].toFixed(3)}</td>
                     <td className={`sentiment-${sentimentCssTable[data['sentiment']]}`}>{data['sentiment']}</td>
@@ -53,6 +54,9 @@ function TickerTable(props) {
 function CustomOffcanvas() {
 
     const [tickerInfo, setTickerInfo] = useState([]);
+    const offcanvasRef = useRef();
+
+    const closeOffCanvas = () => offcanvasRef.current.backdrop.click();
 
     useEffect(() => {
         fetch(TICKERS_INFO_ROUTE)
@@ -80,6 +84,7 @@ function CustomOffcanvas() {
               aria-labelledby={`offcanvasNavbarLabel-expand-false`}
               placement="start"
               className="navbar-offcanvas"
+              ref={offcanvasRef}
             >
               <Offcanvas.Header closeButton className='offcanvas-header'>
                     <Offcanvas.Title id={`offcanvasNavbarLabel-expand-false`} className="offcanvas-title container border-bottom">
@@ -88,7 +93,7 @@ function CustomOffcanvas() {
               </Offcanvas.Header>
 
               <Offcanvas.Body className='offcanvas-body'>
-                <TickerTable tickerInfo={tickerInfo}/>
+                <TickerTable tickerInfo={tickerInfo} closeOffCanvas={closeOffCanvas}/>
               </Offcanvas.Body>
             </Navbar.Offcanvas>
         </>

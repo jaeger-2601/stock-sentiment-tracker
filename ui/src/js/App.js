@@ -1,5 +1,7 @@
-import logo from '../assets/logo.svg';
+import { Outlet } from 'react-router-dom';
+
 import '../css/App.css';
+
 import CustomNavbar from './Navbar';
 
 function App() {
@@ -8,6 +10,10 @@ function App() {
       <header>
         <CustomNavbar/>
       </header>
+      
+      <div id="detail">
+        <Outlet />
+      </div>
     </div>
   );
 }
