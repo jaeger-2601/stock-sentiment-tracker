@@ -7,10 +7,57 @@
     background-color: white !important ;
 }
 
+.offcanvas-header {
+    padding-bottom: 0px;
+}
+
+.offcanvas-body {
+    padding-top: 0px !important;
+}
+
 .ticker-ranks  th {
+    text-align: center;
+    color: #54B4D3;
+}
+
+.ticker-ranks td {
+    text-align: center;
     color: white;
+}
+
+.ticker-name {
+    text-decoration: none;
+    font-weight: bolder;
+    color: #1ff073;
+}
+
+.ticker-name:hover {
+    color: #54B4D3;
 }
 
 .offcanvas-title {
     text-align: center;
+    padding-bottom: 1em;
+    color: #54B4D3 ;
+    border-color: #68cff2 !important;
+}
+
+.sentiment-pos {
+    color:#14A44D !important;
+}
+
+.sentiment-sli-pos {
+    color:#6ec691 !important;
+}
+
+.sentiment-neu {
+    color:white !important;
+}
+
+.sentiment-sli-neg {
+    color: #dc808f !important;   
+}
+
+.sentiment-neg {
+ color: #DC4C64 !important;   
 }
