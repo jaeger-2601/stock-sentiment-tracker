@@ -1,8 +1,4 @@
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
 import Navbar from 'react-bootstrap/Navbar';
-import Nav from 'react-bootstrap/Nav';
-import NavDropdown from 'react-bootstrap/NavDropdown';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import Container from 'react-bootstrap/esm/Container';
 import Table from 'react-bootstrap/Table';
@@ -20,11 +16,9 @@ function CustomOffcanvas() {
               className="navbar-offcanvas"
             >
               <Offcanvas.Header closeButton>
-                <Container>
-                    <Offcanvas.Title id={`offcanvasNavbarLabel-expand-false`}>
+                    <Offcanvas.Title id={`offcanvasNavbarLabel-expand-false`} className="offcanvas-title container">
                     Ranking
                     </Offcanvas.Title>
-                </Container>
               </Offcanvas.Header>
 
               <Offcanvas.Body>

@@ -1,6 +1,5 @@
 from enum import Enum
 from collections import Counter
-from data_ingestion.preprocessing import text_analysis_preprocess
 from fastapi import status, APIRouter, Depends, HTTPException
 from data_ingestion.stocks import djia_stocks
 
@@ -42,4 +41,22 @@ def get_word_count(time_range:TimeRange, company:str = Depends(valid_company)):
 
     return {
         'data': words_counts.most_common(30)
+    }
+
+@router.get('/tickers-info/{time_range}')
+def get_ticker_info(time_range:TimeRange):
+
+    overall_sentiment_scores = flux_queries.get_overall_sentiment_averages(time_range)
+
+    data = [ 
+        {
+            'rank': i+1, 
+            'company': s_data[0], 
+            'score': s_data[1], 
+        } 
+        for i, s_data in enumerate(overall_sentiment_scores)
+    ]
+
+    return {
+        'data': data
     }

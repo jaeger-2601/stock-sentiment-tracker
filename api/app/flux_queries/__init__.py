@@ -1,8 +1,11 @@
 import os
+
 from dotenv import load_dotenv
 from influxdb_client import InfluxDBClient
 
-from .query_builder import build_moving_avg_query, build_social_media_text_query
+from .query_builder import (build_moving_avg_query,
+                            build_overall_sentiment_averages_query,
+                            build_social_media_text_query)
 
 load_dotenv()
 
@@ -46,4 +49,18 @@ def get_social_media_text(company:str, time_range:str) -> list:
     
     return social_media_text
 
+def get_overall_sentiment_averages(time_range:str) -> list:
+    
+    result = query_api.query(
+        org=os.environ['ORG'],
+        query=build_overall_sentiment_averages_query(time_range)
+    )
 
+    overall_sentiment_averages = []
+
+
+    for table in result:
+        for record in table.records:
+            overall_sentiment_averages.append((record['company'], record.get_value()))
+    
+    return overall_sentiment_averages
