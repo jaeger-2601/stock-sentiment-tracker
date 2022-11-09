@@ -127,6 +127,23 @@ def get_company_fundamentals(company:str = Depends(valid_company)):
                     'shortRatio': company_info['shortRatio'],
                     'shortInterest': company_info['dateShortInterest'],
                 }
-                
+
+            }
+        }
+
+@router.get('/basic-info/{company}')
+def get_basic_info(company:str = Depends(valid_company)):
+
+    company_info = yf.Ticker(company).info
+
+    if company_info is None:
+        return { 'data': '' }
+    else:
+        return {
+            'data': {
+                'fullName': company_info['longName'],
+                'industry': company_info['industry'],
+                'country': company_info['country'],
+                'recommendation': company_info['recommendationKey']
             }
         }

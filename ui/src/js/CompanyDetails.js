@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import ReactWordCloud from 'react-wordcloud';
 
-import { TICKER_PRICES_ROUTE, COMPANY_SUMMARY_ROUTE, WORD_COUNTS_ROUTE, COMPANY_FUNDAMENTALS_ROUTE, MOVING_AVERAGES_ROUTE } from './Routes';
+import { TICKER_PRICES_ROUTE, COMPANY_SUMMARY_ROUTE, WORD_COUNTS_ROUTE, COMPANY_FUNDAMENTALS_ROUTE, MOVING_AVERAGES_ROUTE, BASIC_INFO_ROUTE } from './Routes';
 
 import "../css/CompanyDetails.css";
 
@@ -271,6 +271,7 @@ function TabbedCompanydInfo (props) {
 function CompanyDetails () {
 
     const { companyTicker } = useParams();
+    const [ basicCompanyInfo, setBasicCompanyInfo ] = useState(null);
     const [ tickerPrices, setTickerPrices ] = useState([]);
     const [ timeRange, setTimeRange ] = useState('month');
 
@@ -296,12 +297,26 @@ function CompanyDetails () {
                                                          .replace('{TIME_RANGE}', timeRange);
         fetch(modified_prices_route)
             .then((response) => response.json())
-            .then((json_data) => setTickerPrices(json_data['data']))
+            .then((json_data) => setTickerPrices(json_data['data']));
+        
+        fetch(BASIC_INFO_ROUTE.replace('{COMPANY}', companyTicker))
+            .then((response) => response.json())
+            .then((json_data) => setBasicCompanyInfo(json_data['data']));
     }, [companyTicker, timeRange]);
 
     return (
         <div class="details-body">
-            <h1 class="text-center text-white pt-4"> {companyTicker} </h1>
+            {basicCompanyInfo && (
+                <div class="py-1">
+                <h1 class="text-center text-white py-4"> {basicCompanyInfo['fullName']} </h1>
+                <div class="container">
+                    <p class="text-center text-white"><b class="info-title">Country of Origin:</b> {basicCompanyInfo['country']} 
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="info-title">Industry:</b>  {basicCompanyInfo['industry']} 
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="info-title">Recommendation:</b>  {basicCompanyInfo['recommendation']} </p>
+                </div>
+                </div>
+                )
+            }
             <div class="container price-chart pt-3">
                 <Chart
                     id="ticker_prices"

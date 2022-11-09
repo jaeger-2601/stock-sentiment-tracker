@@ -9,3 +9,4 @@ export const COMPANY_SUMMARY_ROUTE = `${ROOT_URL}/company-summary/{COMPANY}`;
 export const WORD_COUNTS_ROUTE = `${ROOT_URL}/word-counts/{COMPANY}/{TIME_RANGE}`;
 export const COMPANY_FUNDAMENTALS_ROUTE = `${ROOT_URL}/company-fundamentals/{COMPANY}`;
 export const MOVING_AVERAGES_ROUTE = `${ROOT_URL}/moving-averages/{COMPANY}/{TIME_RANGE}`;
+export const BASIC_INFO_ROUTE = `${ROOT_URL}/basic-info/{COMPANY}`;

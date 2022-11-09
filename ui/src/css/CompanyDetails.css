@@ -2,6 +2,11 @@
 body {
     background-color: #2f333c;
 }
+
+.info-title {
+    color: #3B71CA;
+}
+
 .details-body {
     height: 92.5vh;
 }
