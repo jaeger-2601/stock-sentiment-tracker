@@ -88,3 +88,45 @@ def get_company_summary(company:str = Depends(valid_company)):
         return {
             'data': company_info['longBusinessSummary']
         }
+
+@router.get('/company-fundamentals/{company}')
+def get_company_fundamentals(company:str = Depends(valid_company)):
+
+    company_info = yf.Ticker(company).info
+
+    if company_info is None:
+        return { 'data': '' }
+    else:
+        return {
+            'data': {
+                
+                'basicStats': {
+                    'revenue': company_info['totalRevenue'],
+                    'eps': company_info['trailingEps'],
+                    'totalDebt': company_info['totalDebt'],
+                    'trailingPE': company_info['trailingPE'],
+                    'profitMarign': company_info['profitMargins'],
+                    'marketCap': company_info['marketCap']
+                },
+
+                'historicGrowth': {
+                    'revenueGrowth': company_info['revenueGrowth'],
+                    'epsGrowth': company_info['forwardEps'],
+                    'fiftyTwoWeekHigh': company_info['fiftyTwoWeekHigh'],
+                    'fiftyTwoWeekLow': company_info['fiftyTwoWeekLow'],
+                    'floatShares': company_info['floatShares'],
+                    'beta': company_info['beta'],
+                    'dividendRate': company_info['dividendRate']
+                },
+
+                'futureEstimates': {
+                    'earningsQuarterlyGrowth': company_info['earningsQuarterlyGrowth'],
+                    'revenueQuarterlyGrowth': company_info['revenueQuarterlyGrowth'],
+                    'priceToSales': company_info['priceToSalesTrailing12Months'],
+                    'priceToBook': company_info['priceToBook'],
+                    'shortRatio': company_info['shortRatio'],
+                    'shortInterest': company_info['dateShortInterest'],
+                }
+                
+            }
+        }

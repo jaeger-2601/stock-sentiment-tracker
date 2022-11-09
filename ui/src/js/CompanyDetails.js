@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Chart } from 'react-chartjs-2';
-import { Tabs, Tab } from 'react-bootstrap';
+import { Tabs, Tab, Table } from 'react-bootstrap';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import ReactWordCloud from 'react-wordcloud';
 
-import { TICKER_PRICES_ROUTE, COMPANY_SUMMARY_ROUTE, WORD_COUNTS_ROUTE } from './Routes';
+import { TICKER_PRICES_ROUTE, COMPANY_SUMMARY_ROUTE, WORD_COUNTS_ROUTE, COMPANY_FUNDAMENTALS_ROUTE } from './Routes';
 
 import "../css/CompanyDetails.css";
 
@@ -77,6 +77,120 @@ function WordCloud (props) {
 
 }
 
+function CompanyFundamentals (props) {
+
+    const [fundamentalsData, setFundamentalsData] = useState(null);
+
+    useEffect( () => {
+        fetch(COMPANY_FUNDAMENTALS_ROUTE.replace('{COMPANY}', props.company))
+            .then((response) => response.json())
+            .then((json_data) => setFundamentalsData(json_data['data']));
+    }, [props.company]);
+
+    return (
+
+        fundamentalsData && 
+
+        <div class="fundamentals-data pt-4">
+            <Table striped bordered hover variant="dark">
+                <tbody>
+                    <tr><td colspan="2">Basic stats</td></tr>
+                    <tr>
+                        <th>Revenue</th>
+                        <td>{fundamentalsData['basicStats']['revenue']}</td>
+                    </tr>
+                    <tr>
+                        <th>EPS</th>
+                        <td>{fundamentalsData['basicStats']['eps']}</td>
+                    </tr>
+                    <tr>
+                        <th>Total Debt</th>
+                        <td>{fundamentalsData['basicStats']['totalDebt']}</td>
+                    </tr>
+                    <tr>
+                        <th>P/E Ratio</th>
+                        <td>{fundamentalsData['basicStats']['trailingPE']}</td>
+                    </tr>
+                    <tr>
+                        <th>Profit Margin</th>
+                        <td>{fundamentalsData['basicStats']['profitMarign']}</td>
+                    </tr>
+                    <tr>
+                        <th>Market Cap</th>
+                        <td>{fundamentalsData['basicStats']['marketCap']}</td>
+                    </tr>
+                </tbody>
+            </Table>
+
+            <Table striped bordered hover variant="dark">
+                <tbody>
+                <tr><td colspan="2">Historic Growth</td></tr>
+                    <tr>
+                        <th>Revenue Growth</th>
+                        <td>{fundamentalsData['historicGrowth']['revenueGrowth']}</td>
+                    </tr>
+                    <tr>
+                        <th>EPS Growth</th>
+                        <td>{fundamentalsData['historicGrowth']['epsGrowth']}</td>
+                    </tr>
+                    <tr>
+                        <th>52 Week High</th>
+                        <td>{fundamentalsData['historicGrowth']['fiftyTwoWeekHigh']}</td>
+                    </tr>
+                    <tr>
+                        <th>52 Week Low</th>
+                        <td>{fundamentalsData['historicGrowth']['fiftyTwoWeekLow']}</td>
+                    </tr>
+                    <tr>
+                        <th>Float Shares</th>
+                        <td>{fundamentalsData['historicGrowth']['floatShares']}</td>
+                    </tr>
+                    <tr>
+                        <th>Beta</th>
+                        <td>{fundamentalsData['historicGrowth']['beta']}</td>
+                    </tr>
+                    <tr>
+                        <th>Divdend Rate</th>
+                        <td>{fundamentalsData['historicGrowth']['dividendRate']}</td>
+                    </tr>
+                </tbody>
+            </Table>
+
+            <Table striped bordered hover variant="dark">
+
+                <tbody>
+                    <tr><td colspan="2">Future Estimates</td></tr>
+                    <tr>
+                        <th>Earnings Quarterly Growth</th>
+                        <td>{fundamentalsData['futureEstimates']['earningsQuarterlyGrowth']}</td>
+                    </tr>
+                    <tr>
+                        <th>Revenue Quarterly Growth</th>
+                        <td>{fundamentalsData['futureEstimates']['revenueQuarterlyGrowth']}</td>
+                    </tr>
+                    <tr>
+                        <th>Price To Sales Ratio</th>
+                        <td>{fundamentalsData['futureEstimates']['priceToSales']}</td>
+                    </tr>
+                    <tr>
+                        <th>Price To Book Ratio</th>
+                        <td>{fundamentalsData['futureEstimates']['priceToBook']}</td>
+                    </tr>
+                    <tr>
+                        <th>Short Ratio</th>
+                        <td>{fundamentalsData['futureEstimates']['shortRatio']}</td>
+                    </tr>
+                    <tr>
+                        <th>Short Interest</th>
+                        <td>{fundamentalsData['futureEstimates']['shortInterest']}</td>
+                    </tr>
+                </tbody>
+            </Table>
+
+        </div>
+    );
+}
+
 function TabbedCompanydInfo (props) {
     
     return (
@@ -94,7 +208,7 @@ function TabbedCompanydInfo (props) {
           </Tab>
 
           <Tab eventKey="fundamentals" title="Fundamentals">
-            <p> Fundamentals </p>
+            <CompanyFundamentals company={props.company} />
           </Tab>
 
           <Tab eventKey="sentiment-analysis" title="Sentiment Analysis">

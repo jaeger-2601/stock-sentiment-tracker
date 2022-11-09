@@ -33,3 +33,25 @@ body {
     height: 300px;
     width: 500px;
 }
+
+.fundamentals-data {
+    display: flex;
+    flex-direction: row;
+    flex-wrap:wrap-reverse;
+}
+
+.fundamentals-data th {
+    color: #54B4D3 !important;
+    text-align: center !important;
+}
+
+.fundamentals-data td {
+    color: white !important;
+    text-align: center !important;
+}
+
+.fundamentals-data .table {
+    width: 20%;
+    margin-left: 5em;
+    margin-right: 5em;
+}
