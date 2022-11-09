@@ -13,7 +13,7 @@ import {
     Legend,
   } from 'chart.js';
 
-import { TICKER_PRICES_ROUTE } from './Routes';
+import { TICKER_PRICES_ROUTE, COMPANY_SUMMARY_ROUTE } from './Routes';
 
 import "../css/CompanyDetails.css";
 
@@ -42,7 +42,23 @@ const options = {
     }
 };
 
-function TabbedCompanydInfo () {
+function AboutCompany (props) {
+
+    const [summary, setSummary] = useState('');
+
+    useEffect( () => {
+        fetch(COMPANY_SUMMARY_ROUTE.replace('{COMPANY}', props.company))
+            .then((response) => response.json())
+            .then((json_data) => setSummary(json_data['data'])
+        )}, []);
+
+    return (
+        <p class="text-wrap text-white">{summary}</p>
+    )
+
+}
+
+function TabbedCompanydInfo (props) {
     
     return (
         <Tabs
@@ -51,7 +67,7 @@ function TabbedCompanydInfo () {
         fill
       >
         <Tab eventKey="about" title="About">
-          <p> About </p>
+          <AboutCompany company={props.company}/>
         </Tab>
         <Tab eventKey="wordcloud" title="Word Cloud">
             <p> Word Cloud </p>
@@ -79,9 +95,7 @@ function CompanyDetails () {
                                                          .replace('{TIME_RANGE}', timeRange);
         fetch(modified_prices_route)
             .then((response) => response.json())
-            .then((json_data) => {
-                setTickerPrices(json_data['data'])
-            })
+            .then((json_data) => setTickerPrices(json_data['data']))
     }, [companyTicker]);
 
     return (
@@ -108,7 +122,7 @@ function CompanyDetails () {
                 />
             </div>
             <div class="container pt-5">
-                <TabbedCompanydInfo />
+                <TabbedCompanydInfo company={companyTicker} />
             </div>
         </div>
     )

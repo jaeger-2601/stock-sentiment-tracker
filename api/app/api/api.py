@@ -76,3 +76,15 @@ def get_ticker_prices(time_range:TimeRange, company:str = Depends(valid_company)
     return {
         'data': list(ticker_history['Open'])
     }
+
+@router.get('/company-summary/{company}')
+def get_company_summary(company:str = Depends(valid_company)):
+
+    company_info = yf.Ticker(company).info
+
+    if company_info is None:
+        return { 'data': '' }
+    else:
+        return {
+            'data': company_info['longBusinessSummary']
+        }
