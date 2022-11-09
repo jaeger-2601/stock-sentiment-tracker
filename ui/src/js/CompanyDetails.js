@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import ReactWordCloud from 'react-wordcloud';
 
-import { TICKER_PRICES_ROUTE, COMPANY_SUMMARY_ROUTE, WORD_COUNTS_ROUTE, COMPANY_FUNDAMENTALS_ROUTE } from './Routes';
+import { TICKER_PRICES_ROUTE, COMPANY_SUMMARY_ROUTE, WORD_COUNTS_ROUTE, COMPANY_FUNDAMENTALS_ROUTE, MOVING_AVERAGES_ROUTE } from './Routes';
 
 import "../css/CompanyDetails.css";
 
@@ -191,6 +191,55 @@ function CompanyFundamentals (props) {
     );
 }
 
+function SentimentAnalysisGraph (props) {
+
+    const [movingAverages, setMovingAverages] = useState([]);
+    const { ref } = useRef();
+
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+        },
+        elements: {
+            line: {
+                borderWidth: 1,
+            }
+        },
+    };
+
+    useEffect( () => {
+        const modified_averages_route = MOVING_AVERAGES_ROUTE.replace('{COMPANY}', props.company)
+                                                             .replace('{TIME_RANGE}', props.timeRange);
+        fetch(modified_averages_route)
+            .then((response) => response.json())
+            .then((json_data) => setMovingAverages(json_data['data']));
+    }, [props.company, props.timeRange]);
+
+    return (
+        <div class="averages-chart py-4">
+        <Chart
+            id="moving_averages"
+            type="line"
+            ref={ref}
+            options={chartOptions}
+            data={{
+                labels: [...Array(movingAverages.length).keys()],
+                datasets: [{
+                    label: `${props.company} sentiment graph`,
+                    data: movingAverages,
+                    borderColor:  movingAverages.at(0) >= movingAverages.at(-1) ? '#FF6384': '#1ff073',
+                    backgroundColor: movingAverages.at(0) >= movingAverages.at(-1) ? '#FF638480': '#1ff07380',
+                }],      
+            }} 
+        />
+        </div>
+    );
+}
+
 function TabbedCompanydInfo (props) {
     
     return (
@@ -212,7 +261,7 @@ function TabbedCompanydInfo (props) {
           </Tab>
 
           <Tab eventKey="sentiment-analysis" title="Sentiment Analysis">
-            <p> Sentiment Analysis </p>
+            <SentimentAnalysisGraph company={props.company} timeRange={props.timeRange} />
           </Tab>
 
       </Tabs>
@@ -265,8 +314,8 @@ function CompanyDetails () {
                             datasets: [{
                                 label: `${companyTicker} Prices`,
                                 data: tickerPrices,
-                                borderColor: '#FF6384',
-                                backgroundColor: '#FF638480',
+                                borderColor: tickerPrices.at(0) >= tickerPrices.at(-1) ? '#FF6384': '#1ff073',
+                                backgroundColor: tickerPrices.at(0) >= tickerPrices.at(-1) ? '#FF638480': '#1ff07380',
                             }],
 
                             

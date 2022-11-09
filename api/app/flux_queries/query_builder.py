@@ -6,7 +6,7 @@ load_dotenv()
 time_range_conversions = {
     
     'day':['-1d', '1h'],
-    'week':['-1wk', '2h'],
+    'week':['-1w', '2h'],
     'month':['-1mo', '1d']
 }
 
@@ -19,7 +19,7 @@ def build_moving_avg_query(company:str, time_range:str) -> str:
             |> filter(fn: (r) => r["_measurement"] == "stocks")
             |> filter(fn: (r) => r["_field"] == "compound")
             |> filter(fn: (r) => r["company"] == "{company}")
-            |> timedMovingAverage(every: {time_range_conversions[time_range][1]}, period: 10m )
+            |> timedMovingAverage(every: 5m, period: 10m )
             |> yield(name: "moving average")
     '''
 
