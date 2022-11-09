@@ -9,3 +9,27 @@ body {
 .price-chart {
     height: 40%;
 }
+
+.details-body .nav-link {
+    background-color: #20232a;
+    color: white;
+}
+
+.nav-item .active {
+    background-color: #54B4D3 !important;
+    color: white !important;
+    border-color: #54B4D3 !important;
+}
+
+.word-cloud-wrapper-wrapper {
+    display: flex;
+    align-items: center;
+    align-content: center;
+    justify-items: center;
+    justify-content: center;  
+}
+
+.word-cloud-wrapper {
+    height: 300px;
+    width: 500px;
+}
