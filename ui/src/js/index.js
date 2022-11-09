@@ -9,7 +9,8 @@ import '../css/index.css';
 
 import App from './App';
 import ErrorPage from './ErrorPage';
-import CompanyDetails from './CompanyDetails';
+import CompanyDetails from './CompanyDetails'
+import DefaultPage from './DefaultPage';
 import reportWebVitals from './reportWebVitals';
 
 const router = createBrowserRouter([
@@ -18,6 +19,10 @@ const router = createBrowserRouter([
     element: <App />,
     errorElement: <ErrorPage />,
     children: [
+      {
+        path:'',
+        element: <DefaultPage />
+      },
       {
         path: 'company/:companyTicker',
         element: <CompanyDetails />

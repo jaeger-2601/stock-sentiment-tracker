@@ -1,0 +1,11 @@
+.emojis {
+    font-size: 90px;
+}
+
+.page-body {
+    height: 92.5vh;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+}
