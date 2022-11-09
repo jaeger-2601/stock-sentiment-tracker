@@ -59,7 +59,7 @@ function CustomOffcanvas() {
     const closeOffCanvas = () => offcanvasRef.current.backdrop.click();
 
     useEffect(() => {
-        fetch(TICKERS_INFO_ROUTE)
+        fetch(TICKERS_INFO_ROUTE.replace('{TIME_RANGE}', 'month'))
             .then((response) => response.json())
             .then((json_data) => {
 

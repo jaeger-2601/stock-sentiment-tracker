@@ -5,10 +5,11 @@ from data_ingestion.stocks import djia_stocks
 
 from app import flux_queries
 
+import yfinance as yf
+
 router = APIRouter()
 
 class TimeRange(str, Enum):
-    hour='hour'
     day='day'
     week='week'
     month='month'
@@ -59,4 +60,19 @@ def get_ticker_info(time_range:TimeRange):
 
     return {
         'data': data
+    }
+
+@router.get('/ticker-prices/{company}/{time_range}')
+def get_ticker_prices(time_range:TimeRange, company:str = Depends(valid_company)):
+
+    period, interval = {
+        'day':['1d', '1h'],
+        'week':['1wk', '2h'],
+        'month':['1mo', '1d']
+    }[time_range]
+
+    ticker_history = yf.Ticker(company).history(period=period, interval=interval)
+
+    return {
+        'data': list(ticker_history['Open'])
     }

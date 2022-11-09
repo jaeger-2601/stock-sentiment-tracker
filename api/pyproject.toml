@@ -17,6 +17,7 @@ celery = "^5.2.7"
 influxdb-client = "^1.33.0"
 nltk = "^3.7"
 scipy = "^1.9.2"
+yfinance = "^0.1.85"
 
 [tool.poetry.group.dev.dependencies]
 poethepoet = "^0.16.4"
