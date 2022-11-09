@@ -35,6 +35,11 @@
     color: #54B4D3;
 }
 
+.error-img {
+    height: 14em;
+    width: auto;
+}
+
 .offcanvas-title {
     text-align: center;
     padding-bottom: 1em;
