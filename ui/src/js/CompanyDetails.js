@@ -34,7 +34,7 @@ function AboutCompany (props) {
     const [summary, setSummary] = useState('');
 
     useEffect( () => {
-        fetch(COMPANY_SUMMARY_ROUTE.replace('{COMPANY}', props.company))
+        fetch(COMPANY_SUMMARY_ROUTE(props.company))
             .then((response) => response.json())
             .then((json_data) => setSummary(json_data['data'])
         )}, [props.company]);
@@ -55,9 +55,7 @@ function WordCloud (props) {
     const wordCloudSize = [500, 300];
 
     useEffect( () => {
-        const modified_counts_route = WORD_COUNTS_ROUTE.replace('{COMPANY}', props.company)
-                                                        .replace('{TIME_RANGE}', props.timeRange);
-        fetch(modified_counts_route)
+        fetch(WORD_COUNTS_ROUTE(props.company, props.timeRange))
             .then((response) => response.json())
             .then((json_data) => {
                 const data = json_data['data'].map(
@@ -82,7 +80,7 @@ function CompanyFundamentals (props) {
     const [fundamentalsData, setFundamentalsData] = useState(null);
 
     useEffect( () => {
-        fetch(COMPANY_FUNDAMENTALS_ROUTE.replace('{COMPANY}', props.company))
+        fetch(COMPANY_FUNDAMENTALS_ROUTE(props.company))
             .then((response) => response.json())
             .then((json_data) => setFundamentalsData(json_data['data']));
     }, [props.company]);
@@ -212,9 +210,7 @@ function SentimentAnalysisGraph (props) {
     };
 
     useEffect( () => {
-        const modified_averages_route = MOVING_AVERAGES_ROUTE.replace('{COMPANY}', props.company)
-                                                             .replace('{TIME_RANGE}', props.timeRange);
-        fetch(modified_averages_route)
+        fetch(MOVING_AVERAGES_ROUTE(props.company, props.timeRange))
             .then((response) => response.json())
             .then((json_data) => setMovingAverages(json_data['data']));
     }, [props.company, props.timeRange]);
@@ -293,13 +289,11 @@ function CompanyDetails () {
     };
 
     useEffect(() => {
-        const modified_prices_route = TICKER_PRICES_ROUTE.replace('{COMPANY}', companyTicker)
-                                                         .replace('{TIME_RANGE}', timeRange);
-        fetch(modified_prices_route)
+        fetch(TICKER_PRICES_ROUTE(companyTicker, timeRange))
             .then((response) => response.json())
             .then((json_data) => setTickerPrices(json_data['data']));
         
-        fetch(BASIC_INFO_ROUTE.replace('{COMPANY}', companyTicker))
+        fetch(BASIC_INFO_ROUTE(companyTicker))
             .then((response) => response.json())
             .then((json_data) => setBasicCompanyInfo(json_data['data']));
     }, [companyTicker, timeRange]);
