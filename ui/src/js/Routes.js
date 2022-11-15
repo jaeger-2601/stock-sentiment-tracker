@@ -27,6 +27,7 @@ function route(routeStrings, ...pathParameters) {
 }
 
 // Routes
+// NOTE: Ensure routes never contain slash at the end as that might cause a 307 Temporary Redirect to the non slash route
 export const TICKERS_INFO_ROUTE = route`/tickers-info/${"TIME_RANGE"}`;
 export const TICKER_PRICES_ROUTE = route`/ticker-prices/${"COMPANY"}/${"TIME_RANGE"}`;
 export const COMPANY_SUMMARY_ROUTE = route`/company-summary/${"COMPANY"}`;

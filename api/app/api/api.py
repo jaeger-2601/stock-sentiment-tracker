@@ -1,6 +1,7 @@
 from enum import Enum
 from collections import Counter
 from fastapi import status, APIRouter, Depends, HTTPException
+from fastapi_redis_cache import cache_one_day, cache_one_year
 from data_ingestion.stocks import djia_stocks
 
 from app import flux_queries
@@ -63,6 +64,7 @@ def get_ticker_info(time_range:TimeRange):
     }
 
 @router.get('/ticker-prices/{company}/{time_range}')
+@cache_one_day()
 def get_ticker_prices(time_range:TimeRange, company:str = Depends(valid_company)):
 
     period, interval = {
@@ -78,6 +80,7 @@ def get_ticker_prices(time_range:TimeRange, company:str = Depends(valid_company)
     }
 
 @router.get('/company-summary/{company}')
+@cache_one_year()
 def get_company_summary(company:str = Depends(valid_company)):
 
     company_info = yf.Ticker(company).info
@@ -90,6 +93,7 @@ def get_company_summary(company:str = Depends(valid_company)):
         }
 
 @router.get('/company-fundamentals/{company}')
+@cache_one_day()
 def get_company_fundamentals(company:str = Depends(valid_company)):
 
     company_info = yf.Ticker(company).info
@@ -132,6 +136,7 @@ def get_company_fundamentals(company:str = Depends(valid_company)):
         }
 
 @router.get('/basic-info/{company}')
+@cache_one_year()
 def get_basic_info(company:str = Depends(valid_company)):
 
     company_info = yf.Ticker(company).info
