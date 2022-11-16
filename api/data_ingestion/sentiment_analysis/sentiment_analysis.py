@@ -14,15 +14,22 @@ from transformers import logging
 from transformers import AutoTokenizer, AutoConfig
 from transformers import AutoModelForSequenceClassification
 from data_ingestion.stocks import djia_stocks, djia_stocks_reverse
-from data_ingestion.preprocessing import preprocess_text, sentiment_analysis_preprocess, text_analysis_preprocess
+from data_ingestion.preprocessing import (
+    preprocess_text,
+    sentiment_analysis_preprocess,
+    text_analysis_preprocess,
+)
 
-MODEL = 'cardiffnlp/twitter-roberta-base-sentiment-latest'
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu' 
+MODEL = "cardiffnlp/twitter-roberta-base-sentiment-latest"
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 logging.set_verbosity_error()
 load_dotenv()
 
-app = Celery('data_ingestion.sentiment_analysis.sentiment_analysis', broker='pyamqp://guest@localhost//')
+app = Celery(
+    "data_ingestion.sentiment_analysis.sentiment_analysis",
+    broker="pyamqp://guest@localhost//",
+)
 
 
 @worker_process_init.connect
@@ -31,23 +38,28 @@ def init_worker(**kwargs):
     global tokenizer, config, model
     global db_client
     global name_regex, ticker_regex
-    
+
     tokenizer = AutoTokenizer.from_pretrained(MODEL)
     config = AutoConfig.from_pretrained(MODEL)
     model = AutoModelForSequenceClassification.from_pretrained(MODEL).to(DEVICE)
 
     db_client = InfluxDBClient(
-        url=os.environ['INFLUX_URL'],
-        token=os.environ['INFLUX_API_TOKEN'],
-        org=os.environ['ORG']
+        url=os.environ["INFLUX_URL"],
+        token=os.environ["INFLUX_API_TOKEN"],
+        org=os.environ["ORG"],
     )
-    
-    name_regex = re.compile(f'({"|".join([name.lower() for name in djia_stocks.keys()])})')
-    ticker_regex = re.compile(f'({"|".join(["$"+ticker.lower() for ticker in djia_stocks.values()])})')
 
-    os.environ['WORKER_NAME'] = current_process().name
+    name_regex = re.compile(
+        f'({"|".join([name.lower() for name in djia_stocks.keys()])})'
+    )
+    ticker_regex = re.compile(
+        f'({"|".join(["$"+ticker.lower() for ticker in djia_stocks.values()])})'
+    )
+
+    os.environ["WORKER_NAME"] = current_process().name
 
     print(f'{os.environ["WORKER_NAME"]} initialized')
+
 
 def recognize_company(text) -> str | None:
 
@@ -56,7 +68,7 @@ def recognize_company(text) -> str | None:
     companies = name_regex.findall(text)
     tickers = ticker_regex.findall(text)
 
-    companies += [ djia_stocks_reverse[ticker.upper()] for ticker in tickers ]
+    companies += [djia_stocks_reverse[ticker.upper()] for ticker in tickers]
 
     if len(companies) == 0:
         return None
@@ -66,9 +78,8 @@ def recognize_company(text) -> str | None:
     return djia_stocks[company]
 
 
+def apply_analysis(text: str) -> dict | None:
 
-def apply_analysis(text:str) -> dict | None:
-    
     result = {}
     company = recognize_company(text)
     text = preprocess_text(text)
@@ -77,8 +88,7 @@ def apply_analysis(text:str) -> dict | None:
         return None
 
     encoded_input = tokenizer(
-        text=sentiment_analysis_preprocess(text), 
-        return_tensors='pt'
+        text=sentiment_analysis_preprocess(text), return_tensors="pt"
     ).to(DEVICE)
 
     output = model(**encoded_input)
@@ -92,16 +102,17 @@ def apply_analysis(text:str) -> dict | None:
         s = scores[ranking[i]]
 
         print(f"{i+1}) {l} {np.round(float(s), 4)}")
-        
+
         result[l.lower()] = s
 
-    result['compound'] = result['positive'] - result['negative']
-    result['company'] = company.upper()
+    result["compound"] = result["positive"] - result["negative"]
+    result["company"] = company.upper()
 
     return result
-    
-@app.task(name='analyze_and_store')
-def analyze_and_store(text:str) -> None:
+
+
+@app.task(name="analyze_and_store")
+def analyze_and_store(text: str) -> None:
 
     text = preprocess_text(text)
     result = apply_analysis(text)
@@ -110,25 +121,27 @@ def analyze_and_store(text:str) -> None:
 
         with db_client.write_api(write_options=SYNCHRONOUS) as write_api:
 
-            point = Point('stocks') \
-                .tag('company', result['company']) \
-                .field('compound', result['compound']) \
-                .field('negative', result['negative']) \
-                .field('positive', result['positive']) \
-                .field('neutral', result['neutral'])
-            
-            write_api.write(
-                bucket=os.environ['SENTIMENT_BUCKET'],
-                org=os.environ['ORG'], 
-                record=point
+            point = (
+                Point("stocks")
+                .tag("company", result["company"])
+                .field("compound", result["compound"])
+                .field("negative", result["negative"])
+                .field("positive", result["positive"])
+                .field("neutral", result["neutral"])
             )
 
-            point = Point('text') \
-                .tag('company', result['company']) \
-                .field('text', text_analysis_preprocess(text, result['company']))
+            write_api.write(
+                bucket=os.environ["SENTIMENT_BUCKET"],
+                org=os.environ["ORG"],
+                record=point,
+            )
+
+            point = (
+                Point("text")
+                .tag("company", result["company"])
+                .field("text", text_analysis_preprocess(text, result["company"]))
+            )
 
             write_api.write(
-                bucket=os.environ['TEXT_BUCKET'], 
-                org=os.environ['ORG'], 
-                record=point
+                bucket=os.environ["TEXT_BUCKET"], org=os.environ["ORG"], record=point
             )

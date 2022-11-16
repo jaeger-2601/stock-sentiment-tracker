@@ -10,145 +10,140 @@ import yfinance as yf
 
 router = APIRouter()
 
+
 class TimeRange(str, Enum):
-    day='day'
-    week='week'
-    month='month'
+    day = "day"
+    week = "week"
+    month = "month"
 
 
-def valid_company(company:str):
+def valid_company(company: str):
 
     if not company in djia_stocks.values():
 
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail='Invalid company ticker'
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid company ticker"
         )
 
     return company
 
-@router.get('/moving-averages/{company}/{time_range}')
-def get_moving_averages(time_range:TimeRange, company:str = Depends(valid_company)):
+
+@router.get("/moving-averages/{company}/{time_range}")
+def get_moving_averages(time_range: TimeRange, company: str = Depends(valid_company)):
 
     return {
-        'data': flux_queries.get_moving_averages(company, time_range),
+        "data": flux_queries.get_moving_averages(company, time_range),
     }
 
-@router.get('/word-counts/{company}/{time_range}')
-def get_word_count(time_range:TimeRange, company:str = Depends(valid_company)):
+
+@router.get("/word-counts/{company}/{time_range}")
+def get_word_count(time_range: TimeRange, company: str = Depends(valid_company)):
 
     text = flux_queries.get_social_media_text(company, time_range)
-    text_blob = ' '.join(text)
-    words_counts = Counter(text_blob.split(' '))
+    text_blob = " ".join(text)
+    words_counts = Counter(text_blob.split(" "))
 
-    return {
-        'data': words_counts.most_common(30)
-    }
+    return {"data": words_counts.most_common(30)}
 
-@router.get('/tickers-info/{time_range}')
-def get_ticker_info(time_range:TimeRange):
+
+@router.get("/tickers-info/{time_range}")
+def get_ticker_info(time_range: TimeRange):
 
     overall_sentiment_scores = flux_queries.get_overall_sentiment_averages(time_range)
 
-    data = [ 
+    data = [
         {
-            'rank': i+1, 
-            'company': s_data[0], 
-            'score': s_data[1], 
-        } 
+            "rank": i + 1,
+            "company": s_data[0],
+            "score": s_data[1],
+        }
         for i, s_data in enumerate(overall_sentiment_scores)
     ]
 
-    return {
-        'data': data
-    }
+    return {"data": data}
 
-@router.get('/ticker-prices/{company}/{time_range}')
+
+@router.get("/ticker-prices/{company}/{time_range}")
 @cache_one_day()
-def get_ticker_prices(time_range:TimeRange, company:str = Depends(valid_company)):
+def get_ticker_prices(time_range: TimeRange, company: str = Depends(valid_company)):
 
     period, interval = {
-        'day':['1d', '1h'],
-        'week':['1wk', '2h'],
-        'month':['1mo', '1d']
+        "day": ["1d", "1h"],
+        "week": ["1wk", "2h"],
+        "month": ["1mo", "1d"],
     }[time_range]
 
     ticker_history = yf.Ticker(company).history(period=period, interval=interval)
 
-    return {
-        'data': list(ticker_history['Open'])
-    }
+    return {"data": list(ticker_history["Open"])}
 
-@router.get('/company-summary/{company}')
+
+@router.get("/company-summary/{company}")
 @cache_one_year()
-def get_company_summary(company:str = Depends(valid_company)):
+def get_company_summary(company: str = Depends(valid_company)):
 
     company_info = yf.Ticker(company).info
 
     if company_info is None:
-        return { 'data': '' }
+        return {"data": ""}
     else:
-        return {
-            'data': company_info['longBusinessSummary']
-        }
+        return {"data": company_info["longBusinessSummary"]}
 
-@router.get('/company-fundamentals/{company}')
+
+@router.get("/company-fundamentals/{company}")
 @cache_one_day()
-def get_company_fundamentals(company:str = Depends(valid_company)):
+def get_company_fundamentals(company: str = Depends(valid_company)):
 
     company_info = yf.Ticker(company).info
 
     if company_info is None:
-        return { 'data': '' }
+        return {"data": ""}
     else:
         return {
-            'data': {
-                
-                'basicStats': {
-                    'revenue': company_info['totalRevenue'],
-                    'eps': company_info['trailingEps'],
-                    'totalDebt': company_info['totalDebt'],
-                    'trailingPE': company_info['trailingPE'],
-                    'profitMarign': company_info['profitMargins'],
-                    'marketCap': company_info['marketCap']
+            "data": {
+                "basicStats": {
+                    "revenue": company_info["totalRevenue"],
+                    "eps": company_info["trailingEps"],
+                    "totalDebt": company_info["totalDebt"],
+                    "trailingPE": company_info["trailingPE"],
+                    "profitMarign": company_info["profitMargins"],
+                    "marketCap": company_info["marketCap"],
                 },
-
-                'historicGrowth': {
-                    'revenueGrowth': company_info['revenueGrowth'],
-                    'epsGrowth': company_info['forwardEps'],
-                    'fiftyTwoWeekHigh': company_info['fiftyTwoWeekHigh'],
-                    'fiftyTwoWeekLow': company_info['fiftyTwoWeekLow'],
-                    'floatShares': company_info['floatShares'],
-                    'beta': company_info['beta'],
-                    'dividendRate': company_info['dividendRate']
+                "historicGrowth": {
+                    "revenueGrowth": company_info["revenueGrowth"],
+                    "epsGrowth": company_info["forwardEps"],
+                    "fiftyTwoWeekHigh": company_info["fiftyTwoWeekHigh"],
+                    "fiftyTwoWeekLow": company_info["fiftyTwoWeekLow"],
+                    "floatShares": company_info["floatShares"],
+                    "beta": company_info["beta"],
+                    "dividendRate": company_info["dividendRate"],
                 },
-
-                'futureEstimates': {
-                    'earningsQuarterlyGrowth': company_info['earningsQuarterlyGrowth'],
-                    'revenueQuarterlyGrowth': company_info['revenueQuarterlyGrowth'],
-                    'priceToSales': company_info['priceToSalesTrailing12Months'],
-                    'priceToBook': company_info['priceToBook'],
-                    'shortRatio': company_info['shortRatio'],
-                    'shortInterest': company_info['dateShortInterest'],
-                }
-
+                "futureEstimates": {
+                    "earningsQuarterlyGrowth": company_info["earningsQuarterlyGrowth"],
+                    "revenueQuarterlyGrowth": company_info["revenueQuarterlyGrowth"],
+                    "priceToSales": company_info["priceToSalesTrailing12Months"],
+                    "priceToBook": company_info["priceToBook"],
+                    "shortRatio": company_info["shortRatio"],
+                    "shortInterest": company_info["dateShortInterest"],
+                },
             }
         }
 
-@router.get('/basic-info/{company}')
+
+@router.get("/basic-info/{company}")
 @cache_one_year()
-def get_basic_info(company:str = Depends(valid_company)):
+def get_basic_info(company: str = Depends(valid_company)):
 
     company_info = yf.Ticker(company).info
 
     if company_info is None:
-        return { 'data': '' }
+        return {"data": ""}
     else:
         return {
-            'data': {
-                'fullName': company_info['longName'],
-                'industry': company_info['industry'],
-                'country': company_info['country'],
-                'recommendation': company_info['recommendationKey']
+            "data": {
+                "fullName": company_info["longName"],
+                "industry": company_info["industry"],
+                "country": company_info["country"],
+                "recommendation": company_info["recommendationKey"],
             }
         }

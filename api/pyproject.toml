@@ -24,6 +24,7 @@ fastapi-redis-cache = "^0.2.5"
 poethepoet = "^0.16.4"
 ipython = "^8.5.0"
 flower = "^1.2.0"
+black = "^22.10.0"
 
 
 [tool.poe.tasks]

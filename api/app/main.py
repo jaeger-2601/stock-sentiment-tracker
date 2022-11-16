@@ -7,10 +7,7 @@ from dotenv import load_dotenv
 
 from app.api import api
 
-origins = [
-    'http://localhost:8000',
-    'http://localhost:3000'
-]
+origins = ["http://localhost:8000", "http://localhost:3000"]
 
 load_dotenv()
 
@@ -24,11 +21,9 @@ app.add_middleware(
 )
 app.include_router(api.router)
 
-@app.on_event('startup')
+
+@app.on_event("startup")
 def startup():
 
     redis_cache = FastApiRedisCache()
-    redis_cache.init(
-        host_url=os.environ['REDIS_URL'],
-        prefix='api-cache'
-    )
+    redis_cache.init(host_url=os.environ["REDIS_URL"], prefix="api-cache")
