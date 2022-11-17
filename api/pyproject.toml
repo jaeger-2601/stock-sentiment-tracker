@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "api"
 version = "0.1.0"
-description = "Backend api to stocks sentiment analyzer platform"
+description = "Backend to stock sentiment tracker platform"
 authors = ["Harshaa Vardaan"]
 
 [tool.poetry.dependencies]

@@ -1,1 +1,1 @@
-# Stocks Sentiment Analyzer API
+# Stock Sentiment Tracker API

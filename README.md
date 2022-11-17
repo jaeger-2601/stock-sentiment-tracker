@@ -1,1 +1,1 @@
-# Stock-Sentiment-Analyzer
+# Stock Sentiment Tracker
