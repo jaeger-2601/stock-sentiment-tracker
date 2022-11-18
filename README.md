@@ -17,7 +17,7 @@ Sentiment analysis is an interesting branch of Natural Language Processing (NLP)
 
 - **Capturing Key markers using NLP:** NLP techniques like Tag Clouds/Word Clouds can provide deeper insights into the sentiment surrounding a stock. 
 
-## Architecure
+## Architecture
 
 ![Main Architecture](images/main-architecture.png)
 The proposed system uses real time streaming data from two data sources (Twitter and Reddit) for sentiment analysis.
