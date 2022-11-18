@@ -25,6 +25,7 @@ poethepoet = "^0.16.4"
 ipython = "^8.5.0"
 flower = "^1.2.0"
 black = "^22.10.0"
+pylint = "^2.15.5"
 
 
 [tool.poe.tasks]
