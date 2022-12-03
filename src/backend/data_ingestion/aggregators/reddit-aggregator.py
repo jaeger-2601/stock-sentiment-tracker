@@ -25,7 +25,10 @@ class RedditAggregator:
             broker="pyamqp://guest@localhost//",
         )
 
-        fileConfig("logging.conf", defaults={"logfilename": "logs/reddit.log"})
+        fileConfig(
+            "data_ingestion/aggregators/logging.conf",
+            defaults={"logfilename": "data_ingestion/aggregators/logs/reddit.log"},
+        )
         self.logger = getLogger("RedditAggregator")
 
         self.logger.info("Reddit aggregator initialized")

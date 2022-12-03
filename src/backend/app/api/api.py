@@ -4,7 +4,7 @@ from fastapi import status, APIRouter, Depends, HTTPException
 from fastapi_redis_cache import cache_one_day, cache_one_year
 from data_ingestion.stocks import djia_stocks
 
-from app import flux_queries
+from .. import flux_queries
 
 import yfinance as yf
 

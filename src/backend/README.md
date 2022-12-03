@@ -7,11 +7,11 @@ poetry install --with dev
 ```
 If the machine has a GPU that has CUDA cores and supports CUDA 11, then run:
 ```bash
-poetry download-pytorch-cuda11
+poetry run poe download-pytorch-cuda11
 ```
 else, run:
 ```bash
-poetry download-pytorch-cpu
+poetry run poe download-pytorch-cpu
 ```
 
 [*Optional*] Install InfluxDB and RabbitMQ with official installers from their respective sites.
@@ -55,16 +55,20 @@ docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.10-ma
 # If running on Windows, run with -P solo as other proccess pools don't work
 poetry run celery -A data_ingestion.sentiment_analysis.sentiment_analysis worker --loglevel=INFO
 ```
+To monitor sentiment analysis workers, use flower
+```bash
+poetry run celery -A data_ingestion.sentiment_analysis.sentiment_analysis flower --loglevel=INFO
+```
 
 4. Start aggregators
 ```bash
-poetry run python aggregators/reddit-aggregator.py
-poetry run python aggregators/twitter-aggregator.py
+poetry run python -m data_ingestion.aggregators.reddit-aggregator
+poetry run python -m data_ingestion.aggregators.twitter-aggregator
 ```
 
 ##### Data Representation
 1. Ensure InfluxDB is running
 2. Run API
 ```bash
-poetry run uvicorn main:app --reload 
+poetry run uvicorn app.main:app --reload 
 ```

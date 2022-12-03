@@ -27,7 +27,10 @@ class TweetAggregator(StreamingClient):
             "data_ingestion.sentiment_analysis.sentiment_analysis",
             broker="pyamqp://guest@localhost//",
         )
-        fileConfig("logging.conf", defaults={"logfilename": "logs/twitter.log"})
+        fileConfig(
+            "data_ingestion/aggregators/logging.conf",
+            defaults={"logfilename": "data_ingestion/aggregators/logs/twitter.log"},
+        )
         self.logger = getLogger("TwitterAggregator")
 
         self.logger.info("Twitter aggregator initialized")

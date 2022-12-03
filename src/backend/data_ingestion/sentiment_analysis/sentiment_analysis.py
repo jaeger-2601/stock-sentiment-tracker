@@ -14,7 +14,7 @@ from transformers import logging
 from transformers import AutoTokenizer, AutoConfig
 from transformers import AutoModelForSequenceClassification
 from data_ingestion.stocks import djia_stocks, djia_stocks_reverse
-from data_ingestion.preprocessing import (
+from .preprocessing import (
     preprocess_text,
     sentiment_analysis_preprocess,
     text_analysis_preprocess,
