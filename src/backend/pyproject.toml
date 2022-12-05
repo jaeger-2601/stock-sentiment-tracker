@@ -6,24 +6,39 @@ authors = ["Harshaa Vardaan"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-fastapi = "^0.79.0"
-uvicorn = "^0.18.2"
 python-dotenv = "^0.20.0"
-tweepy = {extras = ["async"], version = "^4.10.0"}
-praw = "^7.6.0"
-transformers = "^4.21.2"
-emoji = "^2.1.0"
-celery = "^5.2.7"
-influxdb-client = "^1.33.0"
-nltk = "^3.7"
-scipy = "^1.9.2"
-yfinance = "^0.1.85"
+
+
+[tool.poetry.group.api.dependencies]
+fastapi = "^0.88.0"
+uvicorn = "^0.20.0"
+yfinance = "^0.1.87"
 fastapi-redis-cache = "^0.2.5"
+influxdb-client = "^1.35.0"
+
+
+[tool.poetry.group.aggregators.dependencies]
+tweepy = "^4.12.1"
+praw = "^7.6.1"
+celery = "^5.2.7"
+
+
+[tool.poetry.group.sentiment-analysis.dependencies]
+emoji = "^2.2.0"
+nltk = "^3.7"
+transformers = "^4.25.1"
+influxdb-client = "^1.35.0"
+scipy = "^1.9.3"
+celery = "^5.2.7"
+poethepoet = "^0.16.5"
+flower = "^1.2.0"
+
+
+[tool.poetry.group.dev]
+optional = true
 
 [tool.poetry.group.dev.dependencies]
-poethepoet = "^0.16.4"
 ipython = "^8.5.0"
-flower = "^1.2.0"
 black = "^22.10.0"
 pylint = "^2.15.5"
 
