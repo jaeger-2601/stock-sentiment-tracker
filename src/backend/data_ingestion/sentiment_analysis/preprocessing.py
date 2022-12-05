@@ -1,16 +1,21 @@
 import re
+import json
 import emoji
 import string
 import nltk
 from nltk.corpus import stopwords
-
-from data_ingestion.stocks import djia_stocks_reverse
 
 try:
     STOPWORDS = stopwords.words("english")
 except LookupError:
     nltk.download("stopwords")
     STOPWORDS = stopwords.words("english")
+
+stocks_reverse = {}
+
+with open("stocks.json") as stocks_fp:
+    stocks = json.load(stocks_fp)["stocks"]
+    stocks_reverse = {v: k for k, v in stocks.items()}
 
 
 def preprocess_text(text: str) -> str:
@@ -53,7 +58,7 @@ def text_analysis_preprocess(text: str, company: str) -> str:
     text = text.lower()
     # remove cashtag and name
     text = re.sub(f"${company}", "", text)
-    text = re.sub(djia_stocks_reverse[company], "", text)
+    text = re.sub(stocks_reverse[company], "", text)
     # remove usernames
     text = re.sub(r"(u\\)(\S+)", "", text)
     text = re.sub(r"(\@)(\S+)", "", text)

@@ -1,14 +1,18 @@
 import os
 import praw
+import json
 from celery import Celery
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from logging import getLogger
 from logging.config import fileConfig
 
-from data_ingestion.stocks import stocks_subreddits
-
 load_dotenv()
+
+stock_subreddits = {}
+
+with open("stocks.json") as stocks_fp:
+    stock_subreddits = json.load(stocks_fp)["stocks"]
 
 
 class RedditAggregator:
@@ -36,7 +40,7 @@ class RedditAggregator:
     def run(self):
 
         end_time = datetime.now() + timedelta(minutes=5)
-        subreddit_instance = self.reddit.subreddit("+".join(stocks_subreddits))
+        subreddit_instance = self.reddit.subreddit("+".join(stock_subreddits))
         comment_count = 0
 
         try:

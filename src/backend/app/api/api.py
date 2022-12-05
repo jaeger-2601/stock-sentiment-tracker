@@ -1,14 +1,19 @@
+import json
 from enum import Enum
 from collections import Counter
 from fastapi import status, APIRouter, Depends, HTTPException
 from fastapi_redis_cache import cache_one_day, cache_one_year
-from data_ingestion.stocks import djia_stocks
 
 from .. import flux_queries
 
 import yfinance as yf
 
 router = APIRouter()
+
+stocks = {}
+
+with open("stocks.json") as stocks_fp:
+    stocks = json.load(stocks_fp)["stocks"]
 
 
 class TimeRange(str, Enum):
@@ -19,7 +24,7 @@ class TimeRange(str, Enum):
 
 def valid_company(company: str):
 
-    if not company in djia_stocks.values():
+    if not company in stocks.values():
 
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid company ticker"

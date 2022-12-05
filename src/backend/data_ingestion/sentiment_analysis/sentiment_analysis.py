@@ -1,5 +1,6 @@
 import os
 import re
+import json
 import torch
 import numpy as np
 from celery import Celery
@@ -13,7 +14,6 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 from transformers import logging
 from transformers import AutoTokenizer, AutoConfig
 from transformers import AutoModelForSequenceClassification
-from data_ingestion.stocks import djia_stocks, djia_stocks_reverse
 from .preprocessing import (
     preprocess_text,
     sentiment_analysis_preprocess,
@@ -22,6 +22,12 @@ from .preprocessing import (
 
 MODEL = "cardiffnlp/twitter-roberta-base-sentiment-latest"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
+stocks, stocks_reverse = {}, {}
+
+with open("stocks.json") as stocks_fp:
+    stocks = json.load(stocks_fp)["stocks"]
+    stocks_reverse = {v: k for k, v in stocks.items()}
 
 logging.set_verbosity_error()
 load_dotenv()
@@ -49,11 +55,9 @@ def init_worker(**kwargs):
         org=os.environ["ORG"],
     )
 
-    name_regex = re.compile(
-        f'({"|".join([name.lower() for name in djia_stocks.keys()])})'
-    )
+    name_regex = re.compile(f'({"|".join([name.lower() for name in stocks.keys()])})')
     ticker_regex = re.compile(
-        f'({"|".join(["$"+ticker.lower() for ticker in djia_stocks.values()])})'
+        f'({"|".join(["$"+ticker.lower() for ticker in stocks.values()])})'
     )
 
     os.environ["WORKER_NAME"] = current_process().name
@@ -68,14 +72,14 @@ def recognize_company(text) -> str | None:
     companies = name_regex.findall(text)
     tickers = ticker_regex.findall(text)
 
-    companies += [djia_stocks_reverse[ticker.upper()] for ticker in tickers]
+    companies += [stocks_reverse[ticker.upper()] for ticker in tickers]
 
     if len(companies) == 0:
         return None
 
     company, count = Counter(companies).most_common(1)[0]
 
-    return djia_stocks[company]
+    return stocks[company]
 
 
 def apply_analysis(text: str) -> dict | None:

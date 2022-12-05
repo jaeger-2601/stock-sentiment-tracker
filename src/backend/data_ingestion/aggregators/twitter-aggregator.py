@@ -1,4 +1,5 @@
 import os
+import json
 from time import sleep
 from celery import Celery
 from datetime import datetime, timedelta
@@ -7,9 +8,12 @@ from tweepy import StreamingClient, StreamRule, Tweet
 from logging import getLogger
 from logging.config import fileConfig
 
-from data_ingestion.stocks import djia_stocks
-
 load_dotenv()
+
+stocks = {}
+
+with open("stocks.json") as stocks_fp:
+    stocks = json.load(stocks_fp)["stocks"]
 
 
 class TwitterRuleError(Exception):
@@ -19,7 +23,6 @@ class TwitterRuleError(Exception):
 class TweetAggregator(StreamingClient):
     def __init__(self, *args, **kwargs):
 
-        self.stocks = djia_stocks
         self.rules = self.build_default_rules()
         self.timeout = timedelta(minutes=5)
         self.tweet_count = 0
@@ -39,8 +42,8 @@ class TweetAggregator(StreamingClient):
 
     def build_default_rules(self):
 
-        ticker_rule = " OR ".join([f"${stock}" for stock in self.stocks.values()])
-        name_rule = " OR ".join(self.stocks.keys())
+        ticker_rule = " OR ".join([f"${stock}" for stock in stocks.values()])
+        name_rule = " OR ".join(stocks.keys())
 
         return [
             # Cashtag rule to get tweets with stock tickers
