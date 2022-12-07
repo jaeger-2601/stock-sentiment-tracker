@@ -12,7 +12,7 @@ from .query_builder import (
 load_dotenv()
 
 db_client = InfluxDBClient(
-    url="http://localhost:8086",
+    url=os.environ["INFLUX_URL"],
     token=os.environ["INFLUX_API_TOKEN"],
     org=os.environ["ORG"],
 )

@@ -42,3 +42,64 @@ The data representation module is composed of API, Frontend UI, Stock data API.
 - **API**: The API uses FastAPI for routing, validation etc .and Flux queries for querying and analyzing the data.
 - **Frontend UI**: The frontend UI utilizes the axios library to communicate with the backend api and stock data api. React is used to declaratively build the UI while Chart.js performs visualizations to present the data in a meaningful manner
 - **Stock data API**: Yahoo! Finance stock data api is queried to show the price information about various stocks.
+
+### Setup
+This project requires docker and docker compose to run.
+
+1. Docker images must be first built using the following command:
+```bash
+docker compose build
+```
+
+2. Start InfluxDB alone using the following command:
+```bash
+docker compose up influx_db
+```
+
+3. Create an account and organization by using the dashboard at http://localhost:8086. 
+
+4. Create two buckets in InfluxDB.
+    - One to store sentiment information.
+    - Another one to store textual information.
+
+5. Create an `environments` directory to store all environment variables and create the following .env files
+    - `.env.influx_db`
+    - `.env.rabbit_mq`
+    - `.env.reddit`
+    - `.env.twitter`
+    - `.env.redis`
+
+
+6. Set the following environment variables with appropriate values in the environment files as listed below:
+    - `.env.influx_db`
+        - `INFLUX_URL`: URL to InfluxDB
+        - `INFLUX_API_TOKEN`: InfluxDB API token
+        - `ORG`: InfluxDB organization name
+        - `SENTIMENT_BUCKET`: Sentiment data bucket name
+        - `TEXT_BUCKET`: Textual data bucket name
+    - `.env.reddit`
+        - `CLIENT_ID`: Reddit client id
+        - `CLIENT_SECRET`: Reddit client secret
+    - `.env.twitter`
+        - `API_KEY:` Twitter API key
+        - `API_KEY_SECRET`: Twitter API key secret
+        - `BEARER_TOKEN`: Twitter bearer token
+    - `.env.redis`
+        - `REDIS_URL`: URL to Redis
+    - `.env.rabbit_mq`
+        - `BROKER_URL`: URL to RabbitMQ broker
+
+### Execution
+The docker compose file has three profiles:
+1. **Data Ingestion**: Run only services required for data ingestion i.e InfluxDB, RabbitMQ, Aggregators, Flower and Celery
+```bash
+docker compose --profile data_ingestion
+```
+2. **Data Representation**: Run only services required for data representation i.e InfluxDB, Redis, API and UI
+```bash
+docker compose --profile data_representation up
+```
+3. **All**: Run all services
+```bash
+docker compose --profile all up
+```
