@@ -1,0 +1,20 @@
+FROM python:3.10-bullseye
+LABEL maintainer="Harshaa Vardaan"
+
+RUN mkdir /app
+RUN mkdir /app/data_ingestion
+COPY src/backend/pyproject.toml /app/pyproject.toml
+COPY src/backend/poetry.lock /app/poetry.lock
+COPY src/backend/stocks.json /app/stocks.json
+COPY src/backend/data_ingestion/sentiment_analysis /app/data_ingestion/sentiment_analysis
+WORKDIR /app
+
+ENV POETRY_VERSION=1.2.2
+
+RUN pip install "poetry==$POETRY_VERSION"
+RUN poetry config virtualenvs.create false
+RUN poetry install --only main,sentiment-analysis --no-root
+RUN poetry run poe download-pytorch-cpu
+
+#Run application
+ENTRYPOINT [ "./data_ingestion/sentiment_analysis/entrypoint.sh" ]

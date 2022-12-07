@@ -1,0 +1,20 @@
+FROM python:3.10-bullseye
+LABEL maintainer="Harshaa Vardaan"
+
+RUN mkdir /app
+RUN mkdir /app/app
+COPY src/backend/pyproject.toml /app/pyproject.toml
+COPY src/backend/poetry.lock /app/poetry.lock
+COPY src/backend/stocks.json /app/stocks.json
+COPY src/backend/app/ /app/app
+WORKDIR /app 
+
+ENV POETRY_VERSION=1.2.2
+
+RUN pip install "poetry==$POETRY_VERSION"
+RUN poetry config virtualenvs.create false
+RUN poetry install --only main,api --no-root
+
+#Run application
+EXPOSE 8000
+ENTRYPOINT [ "poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload" ]

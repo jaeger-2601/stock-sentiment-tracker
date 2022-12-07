@@ -1,0 +1,111 @@
+services:
+
+  influx_db:
+
+    image: "influxdb:2.0.7"
+
+    volumes:
+      - InfluxDBVolume:/var/lib/influxdb2
+    
+    profiles:
+      - data_ingestion
+      - data_representation
+      - all
+    
+    ports:
+      - "8086:8086"
+  
+  rabbit_mq:
+
+    image: "rabbitmq:3.10-management"
+
+    profiles:
+      - data_ingestion
+      - all
+  
+  redis:
+
+    image: "redis:7.0"
+
+    profiles:
+      - data_representation
+      - all
+
+  aggregators:
+
+    build:
+      context: .
+      dockerfile: docker_files/Dockerfile.aggregators
+    
+    env_file:
+      - environments/.env.reddit
+      - environments/.env.twitter
+      - environments/.env.rabbit_mq
+  
+    depends_on:
+      - sentiment_analysis
+    
+    profiles:
+      - data_ingestion
+      - all
+  
+  sentiment_analysis:
+
+    build:
+      context: .
+      dockerfile: docker_files/Dockerfile.sentiment_analysis
+    
+    env_file:
+      - environments/.env.influx_db
+      - environments/.env.rabbit_mq
+
+    depends_on:
+      - influx_db
+      - rabbit_mq
+
+    ports:
+      - "5555:5555"
+    
+    profiles:
+      - data_ingestion
+      - all
+
+  api:
+
+    build:
+      context: .
+      dockerfile: docker_files/Dockerfile.api
+    
+    ports:
+      - "8000:8000"
+    
+    env_file:
+      - environments/.env.influx_db
+      - environments/.env.redis
+
+    depends_on:
+      - influx_db
+      - redis
+    
+    profiles:
+      - data_representation
+      - all
+
+  ui:
+    
+    build:
+      context: .
+      dockerfile: docker_files/Dockerfile.ui
+    
+    ports:
+      - "3000:3000"
+
+    depends_on:
+      - api
+
+    profiles:
+      - data_representation
+      - all
+
+volumes:
+  InfluxDBVolume:

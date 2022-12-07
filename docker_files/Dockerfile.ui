@@ -1,0 +1,12 @@
+FROM node:19-bullseye
+LABEL maintainer="Harshaa Vardaan"
+
+RUN mkdir /app
+COPY src/ui/ /app
+WORKDIR /app
+
+RUN npm install --legacy-peer-deps
+
+# Run the application
+EXPOSE 3000
+ENTRYPOINT [ "npm", "start" ]

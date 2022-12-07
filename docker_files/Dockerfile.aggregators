@@ -1,0 +1,19 @@
+FROM python:3.10-bullseye
+LABEL maintainer="Harshaa Vardaan"
+
+RUN mkdir /app
+RUN mkdir /app/data_ingestion
+COPY src/backend/pyproject.toml /app/pyproject.toml
+COPY src/backend/poetry.lock /app/poetry.lock
+COPY src/backend/stocks.json /app/stocks.json
+COPY src/backend/data_ingestion/aggregators /app/data_ingestion/aggregators
+WORKDIR /app
+
+ENV POETRY_VERSION=1.2.2
+
+RUN pip install "poetry==$POETRY_VERSION"
+RUN poetry config virtualenvs.create false
+RUN poetry install --only main,aggregators --no-root
+
+#Run application
+ENTRYPOINT [ "./data_ingestion/aggregators/entrypoint.sh" ]

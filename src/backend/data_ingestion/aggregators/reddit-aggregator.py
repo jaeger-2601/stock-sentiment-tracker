@@ -26,7 +26,7 @@ class RedditAggregator:
         )
         self.celery = Celery(
             "data_ingestion.sentiment_analysis.sentiment_analysis",
-            broker="pyamqp://guest@localhost//",
+            broker=os.environ["BROKER_URL"],
         )
 
         fileConfig(
