@@ -1,7 +1,10 @@
 import os
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi_redis_cache import FastApiRedisCache, cache
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+
+from redis import asyncio as aioredis
 
 from dotenv import load_dotenv
 
@@ -25,5 +28,7 @@ app.include_router(api.router)
 @app.on_event("startup")
 def startup():
 
-    redis_cache = FastApiRedisCache()
-    redis_cache.init(host_url=os.environ["REDIS_URL"], prefix="api-cache")
+    redis = aioredis.from_url(
+        os.environ["REDIS_URL"], encoding="utf8", decode_responses=True
+    )
+    FastAPICache.init(RedisBackend(redis), prefix="api-cache")
