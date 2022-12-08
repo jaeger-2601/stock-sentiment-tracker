@@ -13,8 +13,8 @@ python-dotenv = "^0.20.0"
 fastapi = "^0.88.0"
 uvicorn = "^0.20.0"
 yfinance = "^0.1.87"
-fastapi-redis-cache = "^0.2.5"
 influxdb-client = "^1.35.0"
+fastapi-cache2 = {extras = ["redis"], version = "^0.1.9"}
 
 
 [tool.poetry.group.aggregators.dependencies]

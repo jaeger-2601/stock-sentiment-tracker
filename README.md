@@ -48,7 +48,7 @@ This project requires docker and docker compose to run.
 
 1. Docker images must be first built using the following command:
 ```bash
-docker compose build
+docker compose --profile all build
 ```
 
 2. Start InfluxDB alone using the following command:

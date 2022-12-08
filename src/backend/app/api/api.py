@@ -2,7 +2,7 @@ import json
 from enum import Enum
 from collections import Counter
 from fastapi import status, APIRouter, Depends, HTTPException
-from fastapi_redis_cache import cache_one_day, cache_one_year
+from fastapi_cache.decorator import cache
 
 from .. import flux_queries
 
@@ -22,6 +22,12 @@ class TimeRange(str, Enum):
     month = "month"
 
 
+class CacheTime(int, Enum):
+    hour = 60 * 60
+    day = 60 * 60 * 24
+    month = 60 * 60 * 24 * 30
+
+
 def valid_company(company: str):
 
     if not company in stocks.values():
@@ -34,7 +40,9 @@ def valid_company(company: str):
 
 
 @router.get("/moving-averages/{company}/{time_range}")
-def get_moving_averages(time_range: TimeRange, company: str = Depends(valid_company)):
+async def get_moving_averages(
+    time_range: TimeRange, company: str = Depends(valid_company)
+):
 
     return {
         "data": flux_queries.get_moving_averages(company, time_range),
@@ -42,7 +50,7 @@ def get_moving_averages(time_range: TimeRange, company: str = Depends(valid_comp
 
 
 @router.get("/word-counts/{company}/{time_range}")
-def get_word_count(time_range: TimeRange, company: str = Depends(valid_company)):
+async def get_word_count(time_range: TimeRange, company: str = Depends(valid_company)):
 
     text = flux_queries.get_social_media_text(company, time_range)
     text_blob = " ".join(text)
@@ -52,7 +60,7 @@ def get_word_count(time_range: TimeRange, company: str = Depends(valid_company))
 
 
 @router.get("/tickers-info/{time_range}")
-def get_ticker_info(time_range: TimeRange):
+async def get_ticker_info(time_range: TimeRange):
 
     overall_sentiment_scores = flux_queries.get_overall_sentiment_averages(time_range)
 
@@ -69,8 +77,10 @@ def get_ticker_info(time_range: TimeRange):
 
 
 @router.get("/ticker-prices/{company}/{time_range}")
-@cache_one_day()
-def get_ticker_prices(time_range: TimeRange, company: str = Depends(valid_company)):
+@cache(expire=CacheTime.hour.value)
+async def get_ticker_prices(
+    time_range: TimeRange, company: str = Depends(valid_company)
+):
 
     period, interval = {
         "day": ["1d", "1h"],
@@ -84,8 +94,8 @@ def get_ticker_prices(time_range: TimeRange, company: str = Depends(valid_compan
 
 
 @router.get("/company-summary/{company}")
-@cache_one_year()
-def get_company_summary(company: str = Depends(valid_company)):
+@cache(expire=CacheTime.month.value)
+async def get_company_summary(company: str = Depends(valid_company)):
 
     company_info = yf.Ticker(company).info
 
@@ -96,8 +106,8 @@ def get_company_summary(company: str = Depends(valid_company)):
 
 
 @router.get("/company-fundamentals/{company}")
-@cache_one_day()
-def get_company_fundamentals(company: str = Depends(valid_company)):
+@cache(expire=CacheTime.day.value)
+async def get_company_fundamentals(company: str = Depends(valid_company)):
 
     company_info = yf.Ticker(company).info
 
@@ -136,8 +146,8 @@ def get_company_fundamentals(company: str = Depends(valid_company)):
 
 
 @router.get("/basic-info/{company}")
-@cache_one_year()
-def get_basic_info(company: str = Depends(valid_company)):
+@cache(expire=CacheTime.month.value)
+async def get_basic_info(company: str = Depends(valid_company)):
 
     company_info = yf.Ticker(company).info
 
