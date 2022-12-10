@@ -1,6 +1,6 @@
 
-// Change URL in production
-const ROOT_URL = 'http://localhost:8000';
+const ROOT_URL = process.env.REACT_APP_API_URL;
+
 
 class PathParametersException {
 

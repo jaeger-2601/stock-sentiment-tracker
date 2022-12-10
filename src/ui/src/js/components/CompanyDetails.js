@@ -15,9 +15,9 @@ import {
 } from 'chart.js';
 import ReactWordCloud from 'react-wordcloud';
 
-import { TICKER_PRICES_ROUTE, COMPANY_SUMMARY_ROUTE, WORD_COUNTS_ROUTE, COMPANY_FUNDAMENTALS_ROUTE, MOVING_AVERAGES_ROUTE, BASIC_INFO_ROUTE } from './Routes';
+import { TICKER_PRICES_ROUTE, COMPANY_SUMMARY_ROUTE, WORD_COUNTS_ROUTE, COMPANY_FUNDAMENTALS_ROUTE, MOVING_AVERAGES_ROUTE, BASIC_INFO_ROUTE } from '../routes';
 
-import "../css/CompanyDetails.css";
+import "../../css/CompanyDetails.css";
 
 ChartJS.register(
     CategoryScale,

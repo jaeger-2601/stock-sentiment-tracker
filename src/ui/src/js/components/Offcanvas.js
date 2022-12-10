@@ -5,9 +5,9 @@ import Table from 'react-bootstrap/Table';
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
-import { TICKERS_INFO_ROUTE } from './Routes';
+import { TICKERS_INFO_ROUTE } from '../routes';
 
-import '../css/Offcanvas.css';
+import '../../css/Offcanvas.css';
 
 
 function TickerTable(props) {

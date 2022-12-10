@@ -7,10 +7,10 @@ import {
 
 import '../css/index.css';
 
-import App from './App';
-import ErrorPage from './ErrorPage';
-import CompanyDetails from './CompanyDetails'
-import DefaultPage from './DefaultPage';
+import App from './components/App';
+import ErrorPage from './components/ErrorPage';
+import CompanyDetails from './components/CompanyDetails'
+import DefaultPage from './components/DefaultPage';
 import reportWebVitals from './reportWebVitals';
 
 const router = createBrowserRouter([

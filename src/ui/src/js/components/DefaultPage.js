@@ -1,4 +1,4 @@
-import '../css/DefaultPage.css'
+import '../../css/DefaultPage.css'
 
 
 function DefaultPage() {

@@ -20,6 +20,7 @@ Sentiment analysis is an interesting branch of Natural Language Processing (NLP)
 ## Architecture
 
 ![Main Architecture](images/main-architecture.png)
+
 The proposed system uses real time streaming data from two data sources (Twitter and Reddit) for sentiment analysis.
 - The data is first pre-processed and sent to a sentiment analysis module through a task queue.
 - The sentiment analysis module applies NLP and sentiment analysis to extract information from the data and stores it in the Influx time-series database.
@@ -30,6 +31,7 @@ The system can be divided logically into two modules: Data Ingestion and Data Re
 
 ### Data Ingestion Architecture
 ![Data Ingestion Architecture](images/data-ingestion-architecture.png)
+
 The data ingestion module is composed of Aggregators, Message Queue, Distributed Task Manager, Sentiment Analysis Workers.
 - **Aggregators**: Aggregators are components that aggregate data from their corresponding sources i.e Twitter and Reddit. This data is then sent to sentiment analysis workers using a message queue.
 - **Message Queue**: RabbitMQ is used by Celery to facilitate communication between the aggregators and sentiment analysis workers
@@ -38,6 +40,7 @@ The data ingestion module is composed of Aggregators, Message Queue, Distributed
 
 ### Data Representation Architecture
 ![Data Representation Architecture](images/data-representation-architecture.png)
+
 The data representation module is composed of API, Frontend UI, Stock data API.
 - **API**: The API uses FastAPI for routing, validation etc .and Flux queries for querying and analyzing the data.
 - **Frontend UI**: The frontend UI utilizes the axios library to communicate with the backend api and stock data api. React is used to declaratively build the UI while Chart.js performs visualizations to present the data in a meaningful manner
@@ -68,6 +71,7 @@ docker compose up influx_db
     - `.env.reddit`
     - `.env.twitter`
     - `.env.redis`
+    - `.env.ui`
 
 
 6. Set the following environment variables with appropriate values in the environment files as listed below:
@@ -88,6 +92,8 @@ docker compose up influx_db
         - `REDIS_URL`: URL to Redis
     - `.env.rabbit_mq`
         - `BROKER_URL`: URL to RabbitMQ broker
+    - `.env.ui`
+        - `REACT_APP_API_URL`: URL to API. 
 
 ### Execution
 The docker compose file has three profiles:
