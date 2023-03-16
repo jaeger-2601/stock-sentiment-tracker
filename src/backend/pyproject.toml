@@ -7,12 +7,12 @@ authors = ["Harshaa Vardaan"]
 [tool.poetry.dependencies]
 python = "^3.10"
 python-dotenv = "^0.20.0"
+yahooquery = "^2.3.0"
 
 
 [tool.poetry.group.api.dependencies]
 fastapi = "^0.88.0"
 uvicorn = "^0.20.0"
-yfinance = "^0.1.87"
 influxdb-client = "^1.35.0"
 fastapi-cache2 = {extras = ["redis"], version = "^0.1.9"}
 

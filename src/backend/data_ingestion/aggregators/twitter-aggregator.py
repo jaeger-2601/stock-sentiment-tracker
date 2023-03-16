@@ -24,7 +24,7 @@ class TweetAggregator(StreamingClient):
     def __init__(self, *args, **kwargs):
 
         self.rules = self.build_default_rules()
-        self.timeout = timedelta(minutes=5)
+        self.timeout = timedelta(minutes=1)
         self.tweet_count = 0
         self.celery = Celery(
             "data_ingestion.sentiment_analysis.sentiment_analysis",
@@ -93,7 +93,7 @@ class TweetAggregator(StreamingClient):
         # Log processed tweet counts every 5 minutes
         if datetime.now() > self.end_time:
 
-            self.logger.info(f"Processed {self.tweet_count} tweets in 5 minutes")
+            self.logger.info(f"Processed {self.tweet_count} tweets in 1 minute")
 
             self.end_time = datetime.now() + self.timeout
             self.tweet_count = 0

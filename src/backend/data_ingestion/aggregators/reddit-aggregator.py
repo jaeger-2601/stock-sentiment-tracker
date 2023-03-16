@@ -39,7 +39,7 @@ class RedditAggregator:
 
     def run(self):
 
-        end_time = datetime.now() + timedelta(minutes=5)
+        end_time = datetime.now() + timedelta(minutes=1)
         subreddit_instance = self.reddit.subreddit("+".join(stock_subreddits))
         comment_count = 0
 
@@ -52,7 +52,7 @@ class RedditAggregator:
 
                 if datetime.now() > end_time:
 
-                    self.logger.info(f"Processed {comment_count} comments in 5 minutes")
+                    self.logger.info(f"Processed {comment_count} comments in 1 minute")
                     end_time = datetime.now() + timedelta(minutes=5)
                     comment_count = 0
 

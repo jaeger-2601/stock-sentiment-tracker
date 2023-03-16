@@ -6,7 +6,7 @@ from fastapi_cache.decorator import cache
 
 from .. import flux_queries
 
-import yfinance as yf
+import yahooquery as yq
 
 router = APIRouter()
 
@@ -84,32 +84,36 @@ async def get_ticker_prices(
 
     period, interval = {
         "day": ["1d", "1h"],
-        "week": ["1wk", "2h"],
+        "week": ["7d", "1h"],
         "month": ["1mo", "1d"],
     }[time_range]
 
-    ticker_history = yf.Ticker(company).history(period=period, interval=interval)
+    ticker_history = yq.Ticker(company).history(period=period, interval=interval)
 
-    return {"data": list(ticker_history["Open"])}
+    return {"data": list(ticker_history["open"])}
 
 
 @router.get("/company-summary/{company}")
 @cache(expire=CacheTime.month.value)
 async def get_company_summary(company: str = Depends(valid_company)):
 
-    company_info = yf.Ticker(company).info
+    company_info = yq.Ticker(company)
+    summary_profile = company_info.summary_profile[company]
 
     if company_info is None:
         return {"data": ""}
     else:
-        return {"data": company_info["longBusinessSummary"]}
+        return {"data": summary_profile["longBusinessSummary"]}
 
 
 @router.get("/company-fundamentals/{company}")
 @cache(expire=CacheTime.day.value)
 async def get_company_fundamentals(company: str = Depends(valid_company)):
 
-    company_info = yf.Ticker(company).info
+    company_info = yq.Ticker(company)
+    financial_data = company_info.financial_data[company]
+    key_stats = company_info.key_stats[company]
+    summary_detail = company_info.summary_detail[company]
 
     if company_info is None:
         return {"data": ""}
@@ -117,29 +121,24 @@ async def get_company_fundamentals(company: str = Depends(valid_company)):
         return {
             "data": {
                 "basicStats": {
-                    "revenue": company_info["totalRevenue"],
-                    "eps": company_info["trailingEps"],
-                    "totalDebt": company_info["totalDebt"],
-                    "trailingPE": company_info["trailingPE"],
-                    "profitMarign": company_info["profitMargins"],
-                    "marketCap": company_info["marketCap"],
+                    "revenue": financial_data["totalRevenue"],
+                    "eps": key_stats["trailingEps"],
+                    "totalDebt": financial_data["totalDebt"],
+                    "trailingPE": summary_detail["trailingPE"],
+                    "profitMarign": financial_data["profitMargins"],
+                    "marketCap": summary_detail["marketCap"],
                 },
                 "historicGrowth": {
-                    "revenueGrowth": company_info["revenueGrowth"],
-                    "epsGrowth": company_info["forwardEps"],
-                    "fiftyTwoWeekHigh": company_info["fiftyTwoWeekHigh"],
-                    "fiftyTwoWeekLow": company_info["fiftyTwoWeekLow"],
-                    "floatShares": company_info["floatShares"],
-                    "beta": company_info["beta"],
-                    "dividendRate": company_info["dividendRate"],
+                    "revenueGrowth": financial_data["revenueGrowth"],
+                    "epsGrowth": key_stats["forwardEps"],
+                    "fiftyTwoWeekHigh": summary_detail["fiftyTwoWeekHigh"],
+                    "fiftyTwoWeekLow": summary_detail["fiftyTwoWeekLow"],
+                    "floatShares": key_stats["floatShares"],
+                    "beta": key_stats["beta"],
                 },
                 "futureEstimates": {
-                    "earningsQuarterlyGrowth": company_info["earningsQuarterlyGrowth"],
-                    "revenueQuarterlyGrowth": company_info["revenueQuarterlyGrowth"],
-                    "priceToSales": company_info["priceToSalesTrailing12Months"],
-                    "priceToBook": company_info["priceToBook"],
-                    "shortRatio": company_info["shortRatio"],
-                    "shortInterest": company_info["dateShortInterest"],
+                    "priceToBook": key_stats["priceToBook"],
+                    "shortRatio": key_stats["shortRatio"],
                 },
             }
         }
@@ -149,16 +148,19 @@ async def get_company_fundamentals(company: str = Depends(valid_company)):
 @cache(expire=CacheTime.month.value)
 async def get_basic_info(company: str = Depends(valid_company)):
 
-    company_info = yf.Ticker(company).info
+    company_info = yq.Ticker(company)
+
+    name = company_info.price[company]["longName"]
+    summary_profile = company_info.summary_profile[company]
 
     if company_info is None:
         return {"data": ""}
     else:
         return {
             "data": {
-                "fullName": company_info["longName"],
-                "industry": company_info["industry"],
-                "country": company_info["country"],
-                "recommendation": company_info["recommendationKey"],
+                "fullName": name,
+                "industry": summary_profile["industry"],
+                "country": summary_profile["country"],
+                "fullTimeEmployees": summary_profile["fullTimeEmployees"],
             }
         }

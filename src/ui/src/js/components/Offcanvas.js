@@ -99,10 +99,10 @@ function CustomOffcanvas() {
                     )
                     : (
                         <div>
-                            <div class="container d-flex justify-content-center">
-                                <img src="ghost.svg" class="error-img pt-4"></img>
+                            <div className="container d-flex justify-content-center">
+                                <img src="ghost.svg" className="error-img pt-4"></img>
                             </div>
-                            <h4 class="text-center pt-5">Unable to access API..</h4>
+                            <h4 className="text-center pt-5">Unable to access API..</h4>
                         </div>
                     )
                 }

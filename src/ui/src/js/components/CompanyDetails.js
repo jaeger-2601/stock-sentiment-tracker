@@ -15,7 +15,9 @@ import {
 } from 'chart.js';
 import ReactWordCloud from 'react-wordcloud';
 
+import useFetch from '../hooks';
 import { TICKER_PRICES_ROUTE, COMPANY_SUMMARY_ROUTE, WORD_COUNTS_ROUTE, COMPANY_FUNDAMENTALS_ROUTE, MOVING_AVERAGES_ROUTE, BASIC_INFO_ROUTE } from '../routes';
+
 
 import "../../css/CompanyDetails.css";
 
@@ -33,16 +35,10 @@ ChartJS.register(
 
 function AboutCompany (props) {
 
-    const [summary, setSummary] = useState('');
-
-    useEffect( () => {
-        fetch(COMPANY_SUMMARY_ROUTE(props.company))
-            .then((response) => response.json())
-            .then((json_data) => setSummary(json_data['data'])
-        )}, [props.company]);
+    const [summary, setSummary] = useFetch(COMPANY_SUMMARY_ROUTE(props.company));
 
     return (
-        <p class="text-wrap text-white py-4">{summary}</p>
+        <p className="text-wrap text-white py-4">{summary}</p>
     );
 }
 
@@ -68,8 +64,8 @@ function WordCloud (props) {
     }, [props.company, props.timeRange]);
 
     return (
-        <div class="word-cloud-wrapper-wrapper pt-4">
-            <div class="word-cloud-wrapper">
+        <div className="word-cloud-wrapper-wrapper pt-4">
+            <div className="word-cloud-wrapper">
                 <ReactWordCloud words={wordCounts} size={wordCloudSize} options={wordCloudOptions}/>
             </div>
         </div>
@@ -79,22 +75,16 @@ function WordCloud (props) {
 
 function CompanyFundamentals (props) {
 
-    const [fundamentalsData, setFundamentalsData] = useState(null);
-
-    useEffect( () => {
-        fetch(COMPANY_FUNDAMENTALS_ROUTE(props.company))
-            .then((response) => response.json())
-            .then((json_data) => setFundamentalsData(json_data['data']));
-    }, [props.company]);
+    const [fundamentalsData, setFundamentalsData] = useFetch(COMPANY_FUNDAMENTALS_ROUTE(props.company));
 
     return (
 
         fundamentalsData && 
 
-        <div class="fundamentals-data pt-4">
+        <div className="fundamentals-data pt-4">
             <Table striped bordered hover variant="dark">
                 <tbody>
-                    <tr><td colspan="2">Basic stats</td></tr>
+                    <tr><td colSpan="2">Basic stats</td></tr>
                     <tr>
                         <th>Revenue</th>
                         <td>{fundamentalsData['basicStats']['revenue']}</td>
@@ -124,7 +114,7 @@ function CompanyFundamentals (props) {
 
             <Table striped bordered hover variant="dark">
                 <tbody>
-                <tr><td colspan="2">Historic Growth</td></tr>
+                <tr><td colSpan="2">Historic Growth</td></tr>
                     <tr>
                         <th>Revenue Growth</th>
                         <td>{fundamentalsData['historicGrowth']['revenueGrowth']}</td>
@@ -159,7 +149,7 @@ function CompanyFundamentals (props) {
             <Table striped bordered hover variant="dark">
 
                 <tbody>
-                    <tr><td colspan="2">Future Estimates</td></tr>
+                    <tr><td colSpan="2">Future Estimates</td></tr>
                     <tr>
                         <th>Earnings Quarterly Growth</th>
                         <td>{fundamentalsData['futureEstimates']['earningsQuarterlyGrowth']}</td>
@@ -218,7 +208,7 @@ function SentimentAnalysisGraph (props) {
     }, [props.company, props.timeRange]);
 
     return (
-        <div class="averages-chart py-4">
+        <div className="averages-chart py-4">
         <Chart
             id="moving_averages"
             type="line"
@@ -301,19 +291,19 @@ function CompanyDetails () {
     }, [companyTicker, timeRange]);
 
     return (
-        <div class="details-body">
+        <div className="details-body">
             {basicCompanyInfo && (
-                <div class="py-1">
-                <h1 class="text-center text-white py-4"> {basicCompanyInfo['fullName']} </h1>
-                <div class="container">
-                    <p class="text-center text-white"><b class="info-title">Country of Origin:</b> {basicCompanyInfo['country']} 
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="info-title">Industry:</b>  {basicCompanyInfo['industry']} 
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b class="info-title">Recommendation:</b>  {basicCompanyInfo['recommendation']} </p>
+                <div className="py-1">
+                <h1 className="text-center text-white py-4"> {basicCompanyInfo['fullName']} </h1>
+                <div className="container">
+                    <p className="text-center text-white"><b className="info-title">Country of Origin:</b> {basicCompanyInfo['country']} 
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b className="info-title">Industry:</b>  {basicCompanyInfo['industry']} 
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b className="info-title">Recommendation:</b>  {basicCompanyInfo['recommendation']} </p>
                 </div>
                 </div>
                 )
             }
-            <div class="container price-chart pt-3">
+            <div className="container price-chart pt-3">
                 <Chart
                     id="ticker_prices"
                     type="line"
@@ -333,7 +323,7 @@ function CompanyDetails () {
                         }} 
                 />
             </div>
-            <div class="container pt-5">
+            <div className="container pt-5">
                 <TabbedCompanydInfo company={companyTicker} timeRange={timeRange} />
             </div>
         </div>
